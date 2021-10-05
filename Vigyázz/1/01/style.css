@@ -20,6 +20,7 @@ table {
 
 img {
     display: block;
+    margin: auto;
 }
 
 p#footer {
@@ -28,4 +29,8 @@ p#footer {
 
 .prof {
     max-width: 300px;
+}
+
+p.description {
+    max-width: 400px;
 }
