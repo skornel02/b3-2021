@@ -1,0 +1,33 @@
+h1 {
+    text-align: center;
+}
+
+a:link {
+    color: #439fbe;
+    font-family: monospace;
+    text-decoration: none;
+}
+
+a:visited {
+    color: #753862;
+    font-family: monospace;
+    text-decoration: none;
+}
+
+a:hover {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+a:active {
+    background-color: #a7a58c;
+}
+
+ol {
+    font-family: monospace;
+    list-style-type: upper-roman;
+}
+
+ul {
+    font-family: monospace;
+}

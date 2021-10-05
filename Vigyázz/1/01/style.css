@@ -1,0 +1,31 @@
+h1 {
+    color: #e754b7;
+    font-family: Consolas, monospace;
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+p {
+    font-style: italic;
+    text-align: center;
+}
+
+table {
+    margin: auto;
+    text-align: center;
+}
+
+img {
+    display: block;
+}
+
+p#footer {
+    text-align: right;
+}
+
+.prof {
+    max-width: 300px;
+}
