@@ -9,11 +9,21 @@
  * @type {Movie[]}
  */
 const movies = [
-    { name: "Legjobb film", releaseYear: 1999, category: "dráma"},
-    { name: "Legjobb film2", releaseYear: 2003, category: "akció"},
-    { name: "sajt", releaseYear: 2005, category: "történelmi"},
-    { name: "sajt2", releaseYear: 1966, category: "musical"},
-    { name: "hello", releaseYear: 2042, category: "történelmi"},
+    { name: "A remény rabjai", releaseYear: 1994, category: "dráma"},
+    { name: "Forrest Gump", releaseYear: 1994, category: "vígjáték"},
+    { name: "Stephen King: Halálsoron", releaseYear: 1999, category: "thriller"},
+    { name: "Szerelmünk lapjai", releaseYear: 2004, category: "romantika"},
+    { name: "Életrevalók", releaseYear: 2011, category: "vígjáték"},
+    { name: "Terminátor 2. - Az ítélet napja", releaseYear: 1991, category: "akció"},
+    { name: "A keresztapa", releaseYear: 1972, category: "dráma"},
+    { name: "Vissza a jövőbe", releaseYear: 1985, category: "kaland"},
+    { name: "Elrabolva", releaseYear: 2008, category: "akció"},
+    { name: "Gran Torino", releaseYear: 2008, category: "dráma"},
+    { name: "Hetedik", releaseYear: 1995, category: "krimi"},
+    { name: "Kapj el, ha tudsz!", releaseYear: 2002, category: "krimi"},
+    { name: "...és megint dühbe jövünk", releaseYear: 1978, category: "vígjáték"},
+    { name: "Kincs, ami nincs", releaseYear: 1981, category: "kaland"},
+    { name: "Gladiátor", releaseYear: 2000, category: "dráma"},
 ];
 
 /**
@@ -37,8 +47,8 @@ let preferredCategories = [];
 const renderPickers = (categories) => {
     const preferred = document.getElementById('preferred');
     const forbidden = document.getElementById('forbidden');
-    preferred.innerHTML = "";
-    forbidden.innerHTML = "";
+    preferred.innerHTML = "<h2>Kedvelt kategóriák</h2>";
+    forbidden.innerHTML = "<h2>Nem kedvelt kategóriák</h2>";
     categories.forEach(category => {
         preferred.innerHTML += `
         <div>
