@@ -3,6 +3,10 @@ html {
     padding-bottom: 3%;
 }
 
+body {
+    margin: 0px;
+}
+
 footer {
     background-color: rgba(50, 255, 50, 0.4);
     bottom: 0;
