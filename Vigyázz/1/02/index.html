@@ -2,35 +2,53 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <title>Programozás segédletek</title>
+    <title>Film kereső</title>
 
     <link href="../global.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Programozás segédletek</h1>
-    <h2>Elmélet</h2>
-    <ul>
-        <li><a href="https://szit.hu/doku.php?id=oktatas:programozas:programozas_elmelet:tananyag" target="_blank">Programozás elmélet tananyag - Sallai András</a></li>
-        <li><a href="https://regi.tankonyvtar.hu/hu/tartalom/tamop425/0008_simon" target="_blank">A programozás alapjai - Simon Gyula</a></li>
-    
+    <h1>Filmek</h1>
+
+    <div class="pickerContainer">
+        <div id="preferred" class="picker">
+            <div>
+                <label for="testCat1">testCat1</label>
+                <input id="testCat1" type="checkbox" oninput="console.log('testCat1')"/>
+            </div>
+            <div>
+                <label for="testCat2">testCat2</label>
+                <input id="testCat2" type="checkbox"/>
+            </div>
+        </div>
+        <div id="forbidden" class="picker">
+            <div>
+                <label for="testCat1">testCat1</label>
+                <input id="testCat1" type="checkbox"/>
+            </div>
+            <div>
+                <label for="testCat2">testCat2</label>
+                <input id="testCat2" type="checkbox"/>
+            </div>
+        </div>
+    </div>
+
+    <div id="searchBarContainer">
+        <label for="searhBar">Cím keresés:</label>
+        <input id="searchBar" />
+    </div>
+
+    <div id="search">
+        <button onclick="handleRerender()"> Keresés </button>
+    </div>
+
+    <ul id="movies">
+        <li>Nyomja meg a keresés gombot az eredményekhez...</li>
     </ul>
-    <h2>Programnyelvek</h2>
-    <ul>
-        <li><a href="https://youtu.be/guzcGxUM2CU?list=PLUnQJ5ZQoqQJT_sSKYFRu8vP6vJxdo3OZ" target="_blank">Python - Kóder Klub (videó)</a></li>
-        <li><a href="https://youtu.be/JsLEG9WXCDk?list=PL8l6M-0GWNq07jFCk69YUwFW30_iHW7IR" target="_blank">C# - Zoltán Karsa (videó)</a></li>
-        <li><a href="https://youtu.be/CtrMhe5Azys" target="_blank">HTML és CSS - Tamás Mérei (videó)</a></li>
-    </ul>
-    <h2>Közösség</h2>
-    <ul>
-        <li><a href="https://prog.hu/" target="_blank">prog.hu</a></li>
-    </ul>
+    <script src="main.js"></script>
     <footer>
         <a href="../01/index.html">
             <button id="taskBackward">&laquo; Előző feladat</button>
-        </a>
-        <a href="../03/index.html">
-            <button id="taskForward">Következő feladat &raquo;</button>
         </a>
     </footer>
 </body>
