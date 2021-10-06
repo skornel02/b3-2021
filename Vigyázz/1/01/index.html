@@ -13,30 +13,51 @@
     <h2>Budapesti Műszaki Szakképzési Centrum Neumann János Informatikai Technikuma</h2>
     <p>Felkészítő tanárunk: Répásné Babucs Hajnalka</p>
     <table>
-        <tr id="images">
+        <tr>
             <td>
                 <small>Stefán Kornél</small>
                 <img alt="Stefán Kornél" class="prof" src="assets/kornel.JPG">
                 <button style="margin-top: 15px;" onclick="toggleText('k')">Leírás!</button>
-                <p class="description" id="kornel_desc">Én szeretem magamról azt hinni, hogy egy <small>csöndes</small>, sajt szerető fiú vagyok. Kedvenc időtöltésem a kert és a webfejlesztés. Egyszer-egyszer amikor az éjszaka locsolom a virágokat, akkor elgondolkozom azon, hogy mi is az élet értelme.</p>
             </td>
-            <td hidden>
+            <td>
                 <small>Horváth Gergely</small>
                 <img alt="Horváth Gergely" class="prof" src="assets/gergo.JPG">
                 <button style="margin-top: 15px;" onclick="toggleText('g')">Leírás!</button>
-                <p class="description" id="gergo_desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci eligendi quae ducimus cum illum dignissimos pariatur? Vero totam nam tempora, animi nobis suscipit corrupti ea laborum in architecto quisquam asperiores?</p>
             </td>
-            <td hidden>
+            <td>
                 <small>Vad Avar</small>
                 <img alt="Vad Avar" class="prof" src="assets/avar.JPG">
                 <button style="margin-top: 15px;" onclick="toggleText('a')">Leírás!</button>
-                <p class="description" id="avar_desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci eligendi quae ducimus cum illum dignissimos pariatur? Vero totam nam tempora, animi nobis suscipit corrupti ea laborum in architecto quisquam asperiores?</p>
+            </td>
+        </tr>
+        <tr id="descriptions">
+            <td>
+                <p class="description" id="kornel_desc">Én szeretem magamról azt hinni, hogy egy <small>csöndes</small>, sajt szerető fiú vagyok. Kedvenc időtöltésem a kert és a webfejlesztés. Egyszer-egyszer amikor az éjszaka locsolom a virágokat, akkor elgondolkozom azon, hogy mi is az élet értelme.</p>
+            </td>
+            <td>
+                <p class="description" id="gergo_desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci eligendi quae ducimus cum illum dignissimos pariatur? Vero totam nam tempora, animi nobis suscipit corrupti ea laborum in architecto quisquam asperiores?</p>
+            </td>
+            <td>
+                <p class="description" id="avar_desc">Avar vagyok. Jelmondatom a "ma elkészül, de legkésőbb holnapra meglesz" és általában nem így történik. Szeretek mindent halogatni, de ha egyszer nekifogok valaminek, akkod azt addig csinálom, míg tökéletes nem lesz.</p>
+            </td>
+        </tr>
+    </table>
+    <table>
+        <tr id="images">
+            <td>
+                <img alt="Csapat a suli előtt" class="prof" src="assets/suli.png">
+            </td>
+            <td hidden>
+                <img alt="2020 B3 Döntő" class="prof" src="assets/donto.png">
+            </td>
+            <td hidden>
+                <img alt="Felkészítő tanárunkkal" class="prof" src="assets/csapatkep.png">
             </td>
         </tr>
         <tr>
             <td colspan="3">
-                <button onclick="prevImage()">&leftarrow;</button>
-                <button onclick="nextImage()">&rightarrow;</button>
+                <button class="nav-button" onclick="prevImage()">&leftarrow;</button>
+                <button class="nav-button" onclick="nextImage()">&rightarrow;</button>
             </td>
         </tr>
     </table>
@@ -44,8 +65,11 @@
         A pontos idő: <span id="time"></span>
     </p>
     <footer>
-        <a href="../02/index.html">
-            <button id="taskForward">Következő feladat &raquo;</button>
+        <a id="toMenu" href="../index.html">
+            <button>Fő oldal</button>
+        </a>
+        <a id="taskForward" href="../02/index.html">
+            <button>Következő feladat &raquo;</button>
         </a>
     </footer>
 </body>
