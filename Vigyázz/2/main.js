@@ -1,3 +1,14 @@
+/////////////////////////////////////////////////////////////////////////////////
+// flags
+/////////////////////////////////////////////////////////////////////////////////
+
+const DIFFICULTY = 20; // The higher the easier
+const DEBUG_BOMB_VISIBLE = false;
+
+/////////////////////////////////////////////////////////////////////////////////
+// backend
+/////////////////////////////////////////////////////////////////////////////////
+
 /**
  * @typedef {object} Cell
  * This is a cell of the game.
@@ -5,10 +16,11 @@
  * @property {boolean} player
  * @property {boolean} exit
  * @property {boolean} sensorHidden if false, then sensor or sensor range is rendered.
- * @property {boolean} sensorInRange
+ * @property {number} sensorsInRange
  * @property {number} column alt. x
  * @property {number} row alt. y
  * @property {number} distanceFromPlayer Infinity when player is not placed.
+ * @property {boolean} reachable If reachable without tripping
  */
 
 /**
@@ -26,6 +38,11 @@ class Game {
      * @type {boolean}
      */
     finished = false;
+
+    /**
+     * @type {boolean}
+     */
+    won = false;
 
     /**
      * @type {Cell[][]} map
@@ -47,13 +64,29 @@ class Game {
     totalSteps = 0;
 
     /**
-     * 
-     * @param {number?} columnsAmount 
-     * @param {number?} rowsAmount 
+     * @type {number}
      */
-    constructor(columnsAmount = 15, rowsAmount = 12) {
+    closestBomb = Infinity;
+
+    /**
+     * @type {boolean}
+     */
+    gadgetAvailable = true;
+
+    /**
+     * 
+     * @param {number?} columnsAmount min(3)
+     * @param {number?} rowsAmount min(3)
+     */
+    constructor(columnsAmount = 12, rowsAmount = 12) {
+        columnsAmount = Math.max(columnsAmount, 3);
+        rowsAmount = Math.max(rowsAmount, 3);
+
         this.columns = columnsAmount;
         this.rows = rowsAmount;
+
+        // Generate map
+
         /**
           * @type {Cell[][]}
           */
@@ -74,8 +107,8 @@ class Game {
                     player: false,
                     exit: false,
                     sensor: false,
-                    sensorHidden: false,
-                    sensorInRange: false,
+                    sensorHidden: !DEBUG_BOMB_VISIBLE,
+                    sensorsInRange: 0,
                 }
                 if (columnI === 0 && rowI === 0) {
                     item.player = true;
@@ -88,7 +121,44 @@ class Game {
             map.push(column);
         }
         this.map = map;
+
+        // Generate bombs
+        {
+            const totalCells = rowsAmount * columnsAmount;
+            let bombAmount = Math.max(totalCells / DIFFICULTY, 1);
+            console.debug("bombs amount:", bombAmount);
+
+            const changeCell = (cell, active) => {
+                cell.sensor = active;
+                directions.forEach(direction => {
+                    const [nextX, nextY] = getNextCoordinate(cell.column, cell.row, direction);
+                    const nextCell = this.getCell(nextX, nextY);
+                    if (nextCell === undefined) return;
+                    nextCell.sensorsInRange += active ? 1 : -1;
+                })
+            }
+
+            while (bombAmount > 0) {
+                const randomX = Math.floor(Math.random() * columnsAmount);
+                const randomY = Math.floor(Math.random() * rowsAmount);
+                const cell = this.getCell(randomX, randomY);
+                if (cell.sensor) continue;
+                if (isSafeZone(columnsAmount, rowsAmount, randomX, randomY)) continue;
+                changeCell(cell, true);
+
+                this.updateReachable();
+
+                if (!this.getGoal().reachable) {
+                    changeCell(cell, false);
+                    continue;
+                }
+
+                bombAmount--;
+            }
+        }
+
         this.updatePlayerDistance();
+        this.updateClosestBombCounter();
     }
 
     /**
@@ -118,6 +188,16 @@ class Game {
         return cell;
     }
 
+    /**
+     * Returns the closest INVISIBLE cell
+     * @returns {Cell}
+     */
+    getClosestSensor() {        
+        const cell = this.map.flatMap(col => col.filter(item => item.sensor && item.sensorHidden));
+        const sorted = cell.sort((s1, s2) => s1.distanceFromPlayer - s2.distanceFromPlayer);
+        return sorted[0];
+    }
+
     updatePlayerDistance() {
         for (let y = 0; y < this.rows; y++) {
             for (let x = 0; x < this.columns; x++) {
@@ -127,14 +207,6 @@ class Game {
         }
         const { column: playerX, row: playerY } = this.getPlayer();
         this.updatePlayerDistanceReal(playerX, playerY, 0);
-    }
-
-    checkGameEndCondition() {
-        const goal = this.getGoal();
-        if (goal.distanceFromPlayer === 0) {
-            console.log("Játék véget ért, nyert!");
-            this.finished = true;
-        }
     }
 
     updatePlayerDistanceReal(column, row, distance) {
@@ -147,6 +219,50 @@ class Game {
                 if (nextCell === undefined) return;
                 this.updatePlayerDistanceReal(nextCell.column, nextCell.row, distance + 1);
             })
+        }
+    }
+
+    updateReachable() {
+        for (let y = 0; y < this.rows; y++) {
+            for (let x = 0; x < this.columns; x++) {
+                const cell = this.getCell(x, y);
+                cell.reachable = false;
+            }
+        }
+        const { column: playerX, row: playerY } = this.getPlayer();
+        this.updateReachableReal(playerX, playerY);
+    }
+
+    updateReachableReal(column, row) {
+        const cell = this.getCell(column, row);
+        if (cell.sensor) return;
+        if (cell.sensorsInRange > 0) return;
+        if (cell.reachable) return;
+        cell.reachable = true;
+        directions.forEach(direction => {
+            const [nextX, nextY] = getNextCoordinate(cell.column, cell.row, direction);
+            const nextCell = this.getCell(nextX, nextY);
+            if (nextCell === undefined) return;
+            this.updateReachableReal(nextCell.column, nextCell.row);
+        })
+    }
+
+    updateClosestBombCounter() {
+        this.closestBomb = this.getClosestSensor().distanceFromPlayer;
+    }
+
+    checkGameEndCondition() {
+        const goal = this.getGoal();
+        if (goal.distanceFromPlayer === 0) {
+            console.debug("Játék véget ért, nyert!");
+            this.finished = true;
+            this.won = true;
+        }
+        const player = this.getPlayer();
+        if (player.sensor || player.sensorsInRange > 0) {
+            console.debug("Játék véget ért, vesztett!");
+            this.finished = true;
+            this.won = false;
         }
     }
 
@@ -167,17 +283,19 @@ class Game {
         this.getCell(nextX, nextY).player = true;
 
         this.updatePlayerDistance();
+        this.updateClosestBombCounter();
         this.checkGameEndCondition();
 
         return true;
     }
 
-    printGame() {
+    printGame(showHidden = false) {
         console.group();
         console.log("Játék jelenlegi állapota - ", this.finished ? "vége" : "fut", " - összlépések: ", this.totalSteps);
         const { column: playerX, row: playerY } = this.getPlayer();
         const { column: goalX, row: goalY, distanceFromPlayer: goalDistance } = this.getGoal();
         console.log(`Játékos poziciója: (${playerX};${playerY}); Cél pozíciója: (${goalX};${goalY}) - ${goalDistance} távra`);
+        console.log(`Legközelebbi bomba: ${this.closestBomb}`);
         console.log("%cv".padEnd(this.columns + 3, '—') + "v", "font-family:monospace");
         for (let y = 0; y < this.rows; y++) {
             let line = "%c|";
@@ -187,9 +305,9 @@ class Game {
                     line += "C";
                 } else if (cell.exit) {
                     line += "E";
-                } else if (cell.sensor && !cell.sensorHidden) {
+                } else if (cell.sensor && (!cell.sensorHidden || showHidden)) {
                     line += "S";
-                } else if (cell.sensorInRange && !cell.sensorHidden) {
+                } else if (cell.sensorsInRange > 0 && (!cell.sensorHidden || showHidden)) {
                     line += "R";
                 } else {
                     line += ' ';
@@ -200,6 +318,19 @@ class Game {
         }
         console.log("%cv".padEnd(this.columns + 3, '—') + "v", "font-family:monospace");
         console.groupEnd();
+    }
+
+    useGadget() {
+        if (!this.gadgetAvailable) throw "Már felhasználtad a segédeszközöd!";
+        const sensor = this.getClosestSensor();
+        sensor.sensorHidden = false;
+        directions.forEach(direction => {
+            const [nextX, nextY] = getNextCoordinate(sensor.column, sensor.row, direction);
+            const nextCell = this.getCell(nextX, nextY);
+            if (nextCell === undefined) return;
+            nextCell.sensorHidden = false;
+        })
+        this.gadgetAvailable = false;
     }
 }
 
@@ -259,6 +390,24 @@ const getNextCoordinate = (column, row, direction) => {
             return [column + 1, row + 1];
     }
 }
+
+/**
+ * Returns whether a position is considered a safe place. 
+ * @param {number} columns 
+ * @param {number} rows 
+ * @param {number} column 
+ * @param {number} row 
+ * @returns {boolean}
+ */
+const isSafeZone = (columns, rows, column, row) => {
+    if (column < 3 && row < 3) return true;
+    if (column > (columns - 3) && (row > rows - 3)) return true;
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// frontend
+/////////////////////////////////////////////////////////////////////////////////
 
 game = new Game();
 game.printGame();
