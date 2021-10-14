@@ -2,7 +2,7 @@
 // flags
 /////////////////////////////////////////////////////////////////////////////////
 
-const DIFFICULTY = 20; // The higher the easier
+//const DIFFICULTY = 20; // The higher the easier
 const DEBUG_BOMB_VISIBLE = false;
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ class Game {
      * @param {number?} columnsAmount min(3)
      * @param {number?} rowsAmount min(3)
      */
-    constructor(columnsAmount = 12, rowsAmount = 12) {
+    constructor(columnsAmount = 12, rowsAmount = 12, difficulty = 20) {
         columnsAmount = Math.max(columnsAmount, 3);
         rowsAmount = Math.max(rowsAmount, 3);
 
@@ -112,6 +112,7 @@ class Game {
                 }
                 if (columnI === 0 && rowI === 0) {
                     item.player = true;
+                    item.known = true;
                 }
                 if (columnI === columnsAmount - 1 && rowI === rowsAmount - 1) {
                     item.exit = true;
@@ -125,7 +126,7 @@ class Game {
         // Generate bombs
         {
             const totalCells = rowsAmount * columnsAmount;
-            let bombAmount = Math.max(totalCells / DIFFICULTY, 1);
+            let bombAmount = Math.max(totalCells / difficulty, 1);
             console.debug("bombs amount:", bombAmount);
 
             const changeCell = (cell, active) => {
@@ -190,7 +191,7 @@ class Game {
 
     /**
      * Returns the closest INVISIBLE cell
-     * @returns {Cell}
+     * @returns {Cell | undefined}
      */
     getClosestSensor() {        
         const cell = this.map.flatMap(col => col.filter(item => item.sensor && item.sensorHidden));
@@ -248,7 +249,11 @@ class Game {
     }
 
     updateClosestBombCounter() {
-        this.closestBomb = this.getClosestSensor().distanceFromPlayer;
+        const closestSensor = this.getClosestSensor();
+        if (closestSensor)
+            this.closestBomb = closestSensor.distanceFromPlayer;
+        else
+            this.closestBomb = Infinity;
     }
 
     checkGameEndCondition() {
@@ -323,6 +328,7 @@ class Game {
     useGadget() {
         if (!this.gadgetAvailable) throw "Már felhasználtad a segédeszközöd!";
         const sensor = this.getClosestSensor();
+        if (!sensor) throw "Nincs szenzor a pályán!";
         sensor.sensorHidden = false;
         directions.forEach(direction => {
             const [nextX, nextY] = getNextCoordinate(sensor.column, sensor.row, direction);
@@ -331,6 +337,37 @@ class Game {
             nextCell.sensorHidden = false;
         })
         this.gadgetAvailable = false;
+        this.updateClosestBombCounter();
+    }
+
+    render() {
+        const main = document.querySelector("main");
+        const table = document.createElement("table");
+        for (let y = 0; y < this.rows; y++) {
+            const row = document.createElement("tr");
+            for (let x = 0; x < this.columns; x++) {
+                const tableCell = document.createElement("td");
+                const cell = this.getCell(x, y);
+                if (cell.player) {
+                    tableCell.className = "player";
+                } else if (cell.exit) {
+                    tableCell.className = "exit";
+                } else if ((cell.sensor || cell.sensorsInRange > 0) && !cell.sensorHidden) {
+                    tableCell.className = "sensor";
+                }
+                row.appendChild(tableCell);
+            }
+            table.appendChild(row);
+        }
+        main.innerHTML = "";
+        main.appendChild(table);
+        const information = document.createElement("p");
+        information.id = "info";
+        information.innerHTML = `
+        Legközelebbi szenzor távolsága: ${this.closestBomb === Infinity ? "nincs bomba a pályán" : this.closestBomb}
+        `
+
+        main.appendChild(information);
     }
 }
 
@@ -409,5 +446,180 @@ const isSafeZone = (columns, rows, column, row) => {
 // frontend
 /////////////////////////////////////////////////////////////////////////////////
 
-game = new Game();
-game.printGame();
+const easyRadio = document.querySelector("#easy");
+const normalRadio = document.querySelector("#normal");
+const hardRadio = document.querySelector("#hard");
+const radios = [easyRadio, normalRadio, hardRadio];
+
+const newGameButton = document.querySelector("#newGame");
+const helpButton = document.querySelector("#help");
+const buttons = [newGameButton, helpButton];
+
+const main = document.querySelector("main");
+
+const changeDifficulty = (difficulty) => {
+    switch (difficulty){
+        case "easy": {
+            game = new Game(7, 7, 30);
+            break;
+        }
+        case "normal": {
+            game = new Game(10, 10);
+            break;
+        }
+        case "hard": {
+            game = new Game(12, 12, 15);
+            break;
+        }
+    }
+
+    radios.forEach(radio => radio.disabled = true);
+    buttons.forEach(button => button.disabled = false);
+
+    registerListeners();
+    game.render();
+}
+
+const newGame = () => {
+    radios.forEach(radio => {
+        radio.disabled = false;
+        radio.checked = false;
+    });
+    buttons.forEach(button => button.disabled = true);
+    game = undefined;
+
+    unregisterListeners();
+    main.innerHTML = "";
+    keyStates.left = false;
+    keyStates.right = false;
+    keyStates.up = false;
+    keyStates.down = false;
+}
+
+const help = () => {
+    game.useGadget();
+    game.render();
+
+    helpButton.disabled = true;
+}
+
+const keyStates = {
+    up: false,
+    down: false,
+    right: false,
+    left: false
+}
+
+const downListener = (event) => {
+    if (!game) return;
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyW", "KeyD", "KeyS", "KeyA"].includes(event.key)) return;
+    switch (event.key) {
+        case "ArrowLeft":
+        case "KeyA":
+            keyStates.left = true;
+            break;
+        case "ArrowRight":
+        case "KeyD":
+            keyStates.right = true;
+            break;
+        case "ArrowUp":
+        case "KeyW":
+            keyStates.up = true;
+            break;
+        case "ArrowDown":
+        case "KeyS":
+            keyStates.down = true;
+            break;
+    }
+}
+
+const upListener = (event) => {
+    if (!game) return;
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyW", "KeyD", "KeyS", "KeyA"].includes(event.key)) return;
+    switch (event.key) {
+        case "ArrowLeft":
+        case "KeyA":
+            keyStates.left = false;
+            break;
+        case "ArrowRight":
+        case "KeyD":
+            keyStates.right = false;
+            break;
+        case "ArrowUp":
+        case "KeyW":
+            keyStates.up = false;
+            break;
+        case "ArrowDown":
+        case "KeyS":
+            keyStates.down = false;
+            break;
+    }
+}
+
+const registerListeners = () => {
+    document.addEventListener('keydown', downListener);
+    
+    document.addEventListener('keyup', upListener);
+}
+
+const unregisterListeners = () => {
+    document.removeEventListener("keydown", downListener);
+    document.removeEventListener("keyup", upListener);
+}
+
+setInterval(() => {
+    if (!game) return;
+    if (game.won) {
+        alert(`Megnyerted a játékot! ${game.totalSteps} lépés kellett hozzá! Gratulálunk!`);
+        unregisterListeners();
+        newGame();
+        return;
+    }
+    if (game.finished) {
+        alert(`Sajnos túl közel kerültél egy szenzorhoz! Vesztettél! Lépésid száma ${game.totalSteps} volt!`);
+        unregisterListeners();
+        newGame();
+        return;
+    }
+    if (!Object.values(keyStates).some(el => el)) return;
+    if (keyStates.up) {
+        if (keyStates.left) {
+            game.movePlayer("left-up");
+            game.render();
+            return;
+        } else if (keyStates.right) {
+            game.movePlayer("right-up");
+            game.render();
+            return;
+        } else {
+            game.movePlayer("up");
+            game.render();
+            return;
+        }
+    }
+    if (keyStates.down) {
+        if (keyStates.left) {
+            game.movePlayer("left-down");
+            game.render();
+            return;
+        } else if (keyStates.right) {
+            game.movePlayer("right-down");
+            game.render();
+            return;
+        } else {
+            game.movePlayer("down");
+            game.render();
+            return;
+        }
+    }
+    if (keyStates.left) {
+        game.movePlayer("left");
+        game.render();
+        return;
+    }
+    if (keyStates.right) {
+        game.movePlayer("right");
+        game.render();
+        return;
+    }
+}, 75)

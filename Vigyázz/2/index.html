@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="hu">
+
 <head>
     <meta charset="UTF-8">
     <title>Hacker játék</title>
@@ -7,7 +8,37 @@
     <link href="global.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
 </head>
+
 <body>
+    <h1>Hacker játék</h1>
+    <section class="menu">
+        <div class="difficultyMenu">
+            Válassz nehézséget:
+            <div class="difficultyItem">
+                <input onchange="changeDifficulty('easy')" type="radio" name="difficulty" id="easy">
+                <label for="easy">Könnyű</label>
+            </div>
+            <div class="difficultyItem">
+                <input onchange="changeDifficulty('normal')" type="radio" name="difficulty" id="normal">
+                <label for="normal">Normál</label>
+            </div>
+            <div class="difficultyItem">
+                <input onchange="changeDifficulty('hard')" type="radio" name="difficulty" id="hard"> 
+                <label for="hard">Nehéz</label>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="newGame" onclick="newGame()" disabled>Új játék!</button>
+            <button id="help" onclick="help()" disabled>Segítség!</button>
+        </div>
+    </section>
+
+    <main>
+        <!-- Table comes here from script -->
+    </main>
+
+
     <script src="main.js"></script>
 </body>
+
 </html>
