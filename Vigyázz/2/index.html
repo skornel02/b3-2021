@@ -29,12 +29,19 @@
         </div>
         <div class="controls">
             <button id="newGame" onclick="newGame()" disabled>Új játék!</button>
-            <button id="help" onclick="help()" disabled>Segítség!</button>
         </div>
     </section>
 
     <main>
-        <!-- Table comes here from script -->
+        <section id="main">
+            <!--Table comes here from script.-->
+        </section>
+        <section id="steppers">
+            <p>Használd ezeket az irányításhoz:</p>
+            <button onclick="mvPlayer('left-up')">&nwarrow;</button><button  onclick="mvPlayer('up')">&uparrow;</button><button onclick="mvPlayer('right-up')">&nearrow;</button>
+            <button onclick="mvPlayer('left')">&leftarrow;</button><button id="help" onclick="help()">???</button><button onclick="mvPlayer('right')">&rightarrow;</button>
+            <button onclick="mvPlayer('left-down')">&swarrow;</button><button onclick="mvPlayer('down')">&downarrow;</button><button  onclick="mvPlayer('right-down')">&searrow;</button>
+        </section>
     </main>
 
 

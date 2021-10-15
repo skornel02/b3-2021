@@ -340,8 +340,8 @@ class Game {
         this.updateClosestBombCounter();
     }
 
-    render() {
-        const main = document.querySelector("main");
+    render(showHidden = false) {
+        const main = document.querySelector("#main");
         const table = document.createElement("table");
         for (let y = 0; y < this.rows; y++) {
             const row = document.createElement("tr");
@@ -352,7 +352,7 @@ class Game {
                     tableCell.className = "player";
                 } else if (cell.exit) {
                     tableCell.className = "exit";
-                } else if ((cell.sensor || cell.sensorsInRange > 0) && !cell.sensorHidden) {
+                } else if ((cell.sensor || cell.sensorsInRange > 0) && (!cell.sensorHidden || showHidden)) {
                     tableCell.className = "sensor";
                 }
                 row.appendChild(tableCell);
@@ -455,7 +455,8 @@ const newGameButton = document.querySelector("#newGame");
 const helpButton = document.querySelector("#help");
 const buttons = [newGameButton, helpButton];
 
-const main = document.querySelector("main");
+const main = document.querySelector("#main");
+const steppers = document.querySelector("#steppers");
 
 const changeDifficulty = (difficulty) => {
     switch (difficulty){
@@ -475,8 +476,8 @@ const changeDifficulty = (difficulty) => {
 
     radios.forEach(radio => radio.disabled = true);
     buttons.forEach(button => button.disabled = false);
+    steppers.style.display = "grid";
 
-    registerListeners();
     game.render();
 }
 
@@ -487,13 +488,9 @@ const newGame = () => {
     });
     buttons.forEach(button => button.disabled = true);
     game = undefined;
+    steppers.style.display = "none";
 
-    unregisterListeners();
     main.innerHTML = "";
-    keyStates.left = false;
-    keyStates.right = false;
-    keyStates.up = false;
-    keyStates.down = false;
 }
 
 const help = () => {
@@ -503,123 +500,30 @@ const help = () => {
     helpButton.disabled = true;
 }
 
-const keyStates = {
-    up: false,
-    down: false,
-    right: false,
-    left: false
-}
-
-const downListener = (event) => {
+const mvPlayer = (direction) => {
     if (!game) return;
-    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyW", "KeyD", "KeyS", "KeyA"].includes(event.key)) return;
-    switch (event.key) {
-        case "ArrowLeft":
-        case "KeyA":
-            keyStates.left = true;
-            break;
-        case "ArrowRight":
-        case "KeyD":
-            keyStates.right = true;
-            break;
-        case "ArrowUp":
-        case "KeyW":
-            keyStates.up = true;
-            break;
-        case "ArrowDown":
-        case "KeyS":
-            keyStates.down = true;
-            break;
-    }
+    if (!directions.includes(direction)) return;
+    game.movePlayer(direction);
+    game.render();
 }
 
-const upListener = (event) => {
+setInterval(async () => {
     if (!game) return;
-    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyW", "KeyD", "KeyS", "KeyA"].includes(event.key)) return;
-    switch (event.key) {
-        case "ArrowLeft":
-        case "KeyA":
-            keyStates.left = false;
-            break;
-        case "ArrowRight":
-        case "KeyD":
-            keyStates.right = false;
-            break;
-        case "ArrowUp":
-        case "KeyW":
-            keyStates.up = false;
-            break;
-        case "ArrowDown":
-        case "KeyS":
-            keyStates.down = false;
-            break;
-    }
-}
 
-const registerListeners = () => {
-    document.addEventListener('keydown', downListener);
-    
-    document.addEventListener('keyup', upListener);
-}
-
-const unregisterListeners = () => {
-    document.removeEventListener("keydown", downListener);
-    document.removeEventListener("keyup", upListener);
-}
-
-setInterval(() => {
-    if (!game) return;
     if (game.won) {
-        alert(`Megnyerted a játékot! ${game.totalSteps} lépés kellett hozzá! Gratulálunk!`);
-        unregisterListeners();
-        newGame();
+        game.render(true);
+        setTimeout(() => {
+            alert(`Megnyerted a játékot! ${game.totalSteps} lépés kellett hozzá! Gratulálunk!`);
+            newGame();
+        }, 100);
         return;
     }
     if (game.finished) {
-        alert(`Sajnos túl közel kerültél egy szenzorhoz! Vesztettél! Lépésid száma ${game.totalSteps} volt!`);
-        unregisterListeners();
-        newGame();
+        game.render(true);
+        setTimeout(() => {
+            alert(`Sajnos túl közel kerültél egy szenzorhoz! Vesztettél! Lépésid száma ${game.totalSteps} volt!`);
+            newGame();
+        }, 100);
         return;
     }
-    if (!Object.values(keyStates).some(el => el)) return;
-    if (keyStates.up) {
-        if (keyStates.left) {
-            game.movePlayer("left-up");
-            game.render();
-            return;
-        } else if (keyStates.right) {
-            game.movePlayer("right-up");
-            game.render();
-            return;
-        } else {
-            game.movePlayer("up");
-            game.render();
-            return;
-        }
-    }
-    if (keyStates.down) {
-        if (keyStates.left) {
-            game.movePlayer("left-down");
-            game.render();
-            return;
-        } else if (keyStates.right) {
-            game.movePlayer("right-down");
-            game.render();
-            return;
-        } else {
-            game.movePlayer("down");
-            game.render();
-            return;
-        }
-    }
-    if (keyStates.left) {
-        game.movePlayer("left");
-        game.render();
-        return;
-    }
-    if (keyStates.right) {
-        game.movePlayer("right");
-        game.render();
-        return;
-    }
-}, 75)
+}, 50)
