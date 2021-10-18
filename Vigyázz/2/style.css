@@ -27,57 +27,62 @@ h1 {
 main table tr td {
     width: 50px;
     height: 50px;
-    border: black solid 1px;
+    background: url("assets/floor_tile.png");
+    background-size: contain;
 }
 
 .player {
-    background-color: green;
+    background: url("assets/drone.png");
+    background-size: contain;
 }
 
 .exit {
-    background-color: black;
+    background: url("assets/exit.png");
+    background-size: contain;
 }
 
 .sensor {
-    background: red;
+    background: url("assets/sensor.png");
+    background-size: contain;   
 }
 
 table {
     margin: auto;
+    border-collapse: collapse;
 }
 
 #info {
     text-align: center;
 }
 
-#steppers {
-    max-width: 200px;
-    max-height: 200px;
-    margin: auto 15px;
-    display: none;
-    grid-template-rows: 9% 30% 30% 30%;
-    grid-template-columns: 33% 33% 33%;
-    gap: 5px 5px;
-    justify-content: center; 
-    align-content: center; 
-    justify-items: center; 
-    align-items: center; 
-}
-
-#steppers button {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2em;
-    margin: 0;
-    padding: 0;
-}
-
-#steppers p {
-    grid-column: 1/span 3;
-    text-align: center;
-}
-
 main {
     display: flex;
     justify-content: center;
+}
+
+img {
+    user-select: none;
+}
+
+area {
+    cursor: pointer;
+}
+
+#steppers {
+    display: none;
+    padding: 0 25px;
+}
+
+#sensorSensing {
+    background: url("assets/sensor-sensing-sensor.png");
+    background-size: contain;
+    height: 180px;
+    width: 96px;
+    float: right;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: greenyellow;
+    text-align: center;
+    font-family: monospace;
 }

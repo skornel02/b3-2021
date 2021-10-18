@@ -361,13 +361,10 @@ class Game {
         }
         main.innerHTML = "";
         main.appendChild(table);
-        const information = document.createElement("p");
-        information.id = "info";
+        const information = document.querySelector("#sensorSensing");
         information.innerHTML = `
         Legközelebbi szenzor távolsága: ${this.closestBomb === Infinity ? "nincs bomba a pályán" : this.closestBomb}
         `
-
-        main.appendChild(information);
     }
 }
 
@@ -452,11 +449,12 @@ const hardRadio = document.querySelector("#hard");
 const radios = [easyRadio, normalRadio, hardRadio];
 
 const newGameButton = document.querySelector("#newGame");
-const helpButton = document.querySelector("#help");
-const buttons = [newGameButton, helpButton];
+const helpButton = document.querySelector("#helpButton");
+const buttons = [newGameButton];
 
 const main = document.querySelector("#main");
-const steppers = document.querySelector("#steppers");
+const controls = document.querySelector("#control-img");
+const sensorSensing = document.querySelector("#sensorSensing")
 
 const changeDifficulty = (difficulty) => {
     switch (difficulty){
@@ -476,7 +474,7 @@ const changeDifficulty = (difficulty) => {
 
     radios.forEach(radio => radio.disabled = true);
     buttons.forEach(button => button.disabled = false);
-    steppers.style.display = "grid";
+    steppers.style.display = "block";
 
     game.render();
 }
@@ -489,6 +487,8 @@ const newGame = () => {
     buttons.forEach(button => button.disabled = true);
     game = undefined;
     steppers.style.display = "none";
+    controls.src="assets/controller_unused.png";
+    helpButton.style.cursor = "pointer";
 
     main.innerHTML = "";
 }
@@ -496,8 +496,9 @@ const newGame = () => {
 const help = () => {
     game.useGadget();
     game.render();
+    controls.src="assets/controller_used.png";
 
-    helpButton.disabled = true;
+    helpButton.style.cursor = "default";
 }
 
 const mvPlayer = (direction) => {

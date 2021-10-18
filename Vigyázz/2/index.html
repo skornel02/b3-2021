@@ -37,10 +37,20 @@
             <!--Table comes here from script.-->
         </section>
         <section id="steppers">
-            <p>Használd ezeket az irányításhoz:</p>
-            <button onclick="mvPlayer('left-up')">&nwarrow;</button><button  onclick="mvPlayer('up')">&uparrow;</button><button onclick="mvPlayer('right-up')">&nearrow;</button>
-            <button onclick="mvPlayer('left')">&leftarrow;</button><button id="help" onclick="help()">???</button><button onclick="mvPlayer('right')">&rightarrow;</button>
-            <button onclick="mvPlayer('left-down')">&swarrow;</button><button onclick="mvPlayer('down')">&downarrow;</button><button  onclick="mvPlayer('right-down')">&searrow;</button>
+            <p>Használd ezeket az irányításhoz (kattintással):</p>
+            <img src="assets/controller_unused.png" usemap="#image-map" id="control-img">
+            <div id="sensorSensing"></div>
+            <map name="image-map">
+                <area onclick="mvPlayer('up')" alt="Fel" title="Fel" coords="56,38,84,76" shape="rect">
+                <area onclick="mvPlayer('left')" alt="Bal" title="Bal" coords="20,104,55,76" shape="rect">
+                <area onclick="mvPlayer('right')" alt="Jobb" title="Jobb" coords="121,104,84,77" shape="rect">
+                <area onclick="mvPlayer('down')" alt="Le" title="Le" coords="57,144,83,104" shape="rect">
+                <area onclick="mvPlayer('left-up')" alt="Bal-fel" title="Bal-fel" coords="302,53,332,86" shape="rect">
+                <area onclick="mvPlayer('right-up')" alt="Jobb-fel" title="Jobb-fel" coords="374,54,345,84" shape="rect">
+                <area onclick="mvPlayer('left-down')" alt="Bal-le" title="Bal-le" coords="302,127,331,97" shape="rect">
+                <area onclick="mvPlayer('right-down')" alt="Jobb-le" title="Jobb-le" coords="375,127,344,95" shape="rect">
+                <area onclick="help()" alt="Segítség" title="Segítség" coords="207,90,29" shape="circle" id="helpButton">
+            </map>
         </section>
     </main>
 
