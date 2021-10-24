@@ -1,0 +1,10 @@
+html {
+    background-color: #fffbd6;
+    padding-bottom: 3%;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
