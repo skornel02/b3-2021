@@ -14,13 +14,25 @@
 
     <main>
         <div>
-
-            <progress id="timeRemaining" max="1" value="0">
-            </progress>
+            <p aria-label="zöld páratlan">
+                Zöld: code - 1 == code &gt;&gt; 1 &lt;&lt; 1
+            </p>
+            <p aria-label="kék páros">
+                Kék: code % 2 == 0
+            </p>
+            <p aria-label="fekete páros">
+                Fekete: code >= 16
+            </p>
         </div>
-        <canvas id="canvas" width="600" height="600">
+        <div>
+            <canvas id="canvas" width="600" height="400">
+    
+            </canvas>
 
-        </canvas>
+        </div>
+        <button disabled id="freeze" onclick="activateFreeze();">Fagyasztás</button>
+        <button disabled id="streak" onclick="activateStreak();">Streak</button>
+        <button disabled id="cheat" onclick="activateCheat();">Cheat</button>
     </main>
 
 

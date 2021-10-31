@@ -9,11 +9,21 @@ const BOUNDING_HEIGHT = 60;
 
 const RENDER_BOUNDING_BOXES = false;
 
+const FREEZE_LENGTH = 3000;
+const BONUS_TIME_STREAK = 1500;
+const STREAK_BONUS = 10;
+const STREAK_PENALTY = 40;
+
 /////////////////////////////////////////////////////////////////////////////////
-// backend
+// backend, requires canvas with id: canvas
 /////////////////////////////////////////////////////////////////////////////////
 
-const colors = ["black", "green", "blue"]
+/**
+  * @type {HTMLCanvasElement}
+  */
+const canvas = document.querySelector("#canvas");
+
+const colors = ["green", "blue", "black"]
 
 /**
  * @typedef {object} Code
@@ -23,7 +33,38 @@ const colors = ["black", "green", "blue"]
  * @property {string} color
  * @property {number} timeLeft
  * @property {boolean} worthy
+ * @property {boolean} showWorthy
  */
+
+/**
+ * @param {number} difficulty
+ * @returns {[string, string]} label and color
+ */
+const generateCode = (difficulty) => {
+    const label = (Math.round(Math.random() * 255).toString(2).padStart(8, "0"));
+    const color = colors[Math.floor(Math.random() * (difficulty))];
+    return [label, color];
+}
+
+/**
+ * Determines whether the code is correct or not.
+ * @param {string} label 
+ * @param {string} color
+ * @returns {boolean}
+ */
+const isCodeWorthy = (label, color) => {
+    const value = parseInt(label, 2);
+    switch (color) {
+        case "blue":
+            return value % 2 === 0;
+        case "green":
+            return value - 1 === value >> 1 << 1;
+        case "black":
+            return value >= 16;
+        default:
+            return false;
+    }
+}
 
 class Game {
 
@@ -89,7 +130,42 @@ class Game {
     /**
      * @type {number}
      */
-    incorrectCodesFound = 0;    
+    incorrectCodesFound = 0;
+
+    /**
+     * @type {number}
+     */
+    bonusPoints = 0;
+
+    /**
+     * @type {boolean}
+     */
+    freezeUsed = false;
+
+    /**
+     * @type {number}
+     */
+    freezeTicksLeft = 0;
+
+    /**
+     * @type {boolean}
+     */
+    streakUsed = false;
+
+    /**
+     * @type {boolean}
+     */
+    streakActive = false;
+
+    /**
+     * @type {number}
+     */
+    streakCount = 0;
+
+    /**
+     * @type {boolean}
+     */
+    cheatUsed = false;
 
     /**
      * @param {number?} width canvas dimension
@@ -101,13 +177,18 @@ class Game {
         this.canvasHeight = height;
         this.canvasWidth = width;
         this.totalTime = this.timeLeft = Math.max(1, initialTime) * 1000;
-        this.difficulty = Math.max(1, Math.min(3, difficulty));
+        this.difficulty = Math.max(1, Math.min(3, Math.round(difficulty)));
 
         this.intId = setInterval(this.handleTick, 100);
         setTimeout(() => {
             this.addNewElementToGame();
         }, 300);
         console.log(this);
+
+        canvas.addEventListener('click', this.handleClick);
+        document.querySelector("#freeze").disabled = false;
+        document.querySelector("#streak").disabled = false;
+        document.querySelector("#cheat").disabled = false;
     }
 
     get difficultyTime() {
@@ -156,11 +237,15 @@ class Game {
             this.stopGame();
             return;
         }
-        this.timeLeft -= 100;
+        if (this.freezeTicksLeft >= 0) {
+            this.freezeTicksLeft -= 100;
+        } else {
+            this.timeLeft -= 100;
 
-        this.tickNextCode();
-        this.tickActiveCodes();
-        this.render();
+            this.tickNextCode();
+            this.tickActiveCodes();
+        }
+        requestAnimationFrame(this.render);
     }
 
     tickNextCode = () => {
@@ -187,6 +272,8 @@ class Game {
         this.finished = true;
         if (this.intId !== undefined) clearInterval(this.intId);
         if (this.nextId !== undefined) clearTimeout(this.nextId);
+        canvas.removeEventListener('click', this.handleClick);
+        requestAnimationFrame(this.finalRender);
     }
 
     addNewElementToGame = () => {
@@ -227,8 +314,10 @@ class Game {
             ++this.totalCorrectCodes;
         }
 
-        let color = colors[Math.round(Math.random() * 2)];
-        let label = (Math.round(Math.random() * 255).toString(2).padStart(8, "0"));
+        let label, color;
+        do {
+            [label, color] = generateCode(this.difficulty)
+        } while (isCodeWorthy(label, color) !== worthy);
 
         /**
          * @type {Code}
@@ -238,6 +327,7 @@ class Game {
             label, color,
             x, y,
             worthy,
+            showWorthy: false,
         }
         this.activeCodes.push(elem);
         console.log("Adding new element!");
@@ -261,43 +351,70 @@ class Game {
 
     /**
      * 
-     * @param {number} x 
-     * @param {number} y 
+     * @param {MouseEvent} e
      */
-    handleClick = (x, y) => {
+    handleClick = (e) => {
+        const x = e.pageX - canvas.offsetLeft - canvas.clientLeft;
+        const y = e.pageY - canvas.offsetTop - canvas.clientTop;
+        console.log(`click (${x};${y})`);
+
         if (this.finished) return;
 
         const element = this.getElementAtPosition(x, y);
         if (element === undefined) return;
         if (element.worthy) {
             ++this.correctCodesFound;
+            if (this.streakActive) {
+                this.totalTime += BONUS_TIME_STREAK;
+                this.timeLeft += BONUS_TIME_STREAK;
+                this.bonusPoints += STREAK_BONUS * ++this.streakCount;
+            }
         } else {
             ++this.incorrectCodesFound;
+            if (this.streakActive) {
+                this.streakActive = false;
+                this.bonusPoints -= STREAK_PENALTY;
+            }
         }
         this.activeCodes = this.activeCodes.filter(match => match !== element);
     }
 
     render = () => {
-        const progressBar = document.querySelector("#timeRemaining");
-        progressBar.max = this.totalTime;
-        progressBar.value = this.timeLeft;
-
         /**
          * @type {HTMLCanvasElement}
          */
         const canvas = document.querySelector("#canvas");
         const ctx = canvas.getContext("2d");
+
+        // Background
+
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
 
+        // Time remaining
+
+        ctx.fillStyle = this.streakActive ? "pink" : "lightgreen";
+        ctx.strokeStyle = "black"
+        const timePercentage = this.timeLeft / this.totalTime;
+        ctx.fillRect(0, 0, timePercentage * this.canvasWidth, 10);
+
+        if (this.freezeTicksLeft >= 0) {
+            const freePercentage = this.freezeTicksLeft / FREEZE_LENGTH;
+            ctx.fillStyle = "lightblue";
+            ctx.fillRect(0, 0, timePercentage * this.canvasWidth * freePercentage, 10);
+        }
+
+        ctx.strokeRect(0, 0, timePercentage * this.canvasWidth, 10);
+
+        // Boxes
         this.activeCodes.forEach(code => {
-            if (RENDER_BOUNDING_BOXES || code.worthy) {
+            if (RENDER_BOUNDING_BOXES) {
                 const boundingX = code.x - ((BOUNDING_WIDTH - BOX_WIDTH) / 2);
                 const boundingY = code.y - ((BOUNDING_HEIGHT - BOX_HEIGHT) / 2);
                 ctx.fillStyle = "orange";
                 ctx.fillRect(boundingX, boundingY, BOUNDING_WIDTH, BOUNDING_HEIGHT);
             }
-            ctx.fillStyle = code.color;
+            ctx.fillStyle = code.showWorthy && code.worthy ? "gold" : code.color;
             ctx.fillRect(code.x, code.y, BOX_WIDTH, BOX_HEIGHT);
             ctx.textAlign = "center"
             ctx.textBaseline = "middle"
@@ -305,6 +422,44 @@ class Game {
             ctx.font = "20px monospace";
             ctx.fillText(code.label, code.x + (BOX_WIDTH / 2), code.y + (BOX_HEIGHT / 2))
         })
+    }
+
+    finalRender = () => {
+        /**
+         * @type {HTMLCanvasElement}
+         */
+        const canvas = document.querySelector("#canvas");
+        const ctx = canvas.getContext("2d");
+
+        ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+        const points = (this.correctCodesFound / this.totalCorrectCodes * 200) - (this.incorrectCodesFound * 40) + this.bonusPoints;
+
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+        ctx.fillStyle = "black";
+        ctx.font = "20px monospace";
+        ctx.fillText(`Points: ${points.toFixed(0)}`, this.canvasWidth / 2, this.canvasHeight / 2)
+    }
+
+    freeze = () => {
+        if (this.freezeUsed) return;
+        document.querySelector("#freeze").disabled = true;
+        this.freezeUsed = true;
+        this.freezeTicksLeft += FREEZE_LENGTH;
+    }
+
+    streak = () => {
+        if (this.streakUsed) return;
+        document.querySelector("#streak").disabled = true;
+        this.streakUsed = true;
+        this.streakActive = true;
+    }
+
+    cheat = () => {
+        if (this.cheatUsed) return;
+        document.querySelector("#cheat").disabled = true;
+        this.activeCodes.forEach(code => code.showWorthy = true);
     }
 }
 
@@ -319,19 +474,22 @@ class Game {
  */
 let game = undefined;
 
-/**
-  * @type {HTMLCanvasElement}
-  */
-const canvas = document.querySelector("#canvas");
-const canvasTop = canvas.offsetTop;
-const canvasLeft = canvas.offsetLeft;
-canvas.addEventListener('click', e => {
-    const x = e.x - canvasLeft;
-    const y = e.y - canvasTop;
-    console.log(`click (${x};${y})`);
-    if (game !== undefined) {
-        game.handleClick(x, y);
-    }
-});
+game = new Game(600, 400, 10, 1);
 
-game = new Game(600, 600, 30, 2);
+const activateFreeze = () => {
+    if (game !== undefined) {
+        game.freeze();
+    }
+}
+
+const activateStreak = () => {
+    if (game !== undefined) {
+        game.streak();
+    }
+}
+
+const activateCheat = () => {
+    if (game !== undefined) {
+        game.cheat();
+    }
+}
