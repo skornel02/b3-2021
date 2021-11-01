@@ -3,3 +3,47 @@ h1 {
     font-family: Consolas, monospace;
     text-align: center;
 }
+
+.difficultyMenu,
+.controls {
+    display: flex;
+    padding-left: 15px;
+    padding-right: 15px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.difficultyItem {
+    margin-right: 15px;
+}
+
+#descriptions {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#descriptions p {
+    margin: 0;
+    margin-top: 5px;
+}
+
+#blue-desc b, #blue-desc code {
+    color: blue;
+}
+
+#black-desc b, #black-desc code {
+    color: black;
+}
+
+#green-desc b, #green-desc code {
+    color: green;
+}
+
+main {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}

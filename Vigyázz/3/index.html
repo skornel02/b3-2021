@@ -12,27 +12,50 @@
 <body>
     <h1>Hacker játék 2</h1>
 
-    <main>
-        <div>
-            <p aria-label="zöld páratlan">
-                Zöld: code - 1 == code &gt;&gt; 1 &lt;&lt; 1
-            </p>
-            <p aria-label="kék páros">
-                Kék: code % 2 == 0
-            </p>
-            <p aria-label="fekete páros">
-                Fekete: code >= 16
-            </p>
+    <section class="menu">
+        <div class="difficultyMenu">
+            Válassz nehézséget:
+            <div class="difficultyItem">
+                <input onchange="changeDifficulty('easy')" type="radio" name="difficulty" id="easy">
+                <label for="easy">Könnyű</label>
+            </div>
+            <div class="difficultyItem">
+                <input onchange="changeDifficulty('normal')" type="radio" name="difficulty" id="normal">
+                <label for="normal">Normál</label>
+            </div>
+            <div class="difficultyItem">
+                <input onchange="changeDifficulty('hard')" type="radio" name="difficulty" id="hard"> 
+                <label for="hard">Nehéz</label>
+            </div>
         </div>
-        <div>
-            <canvas id="canvas" width="600" height="400">
-    
-            </canvas>
+        <div class="controls">
+            <button id="newGame" onclick="newGame()" disabled>Új játék!</button>
+        </div>
+    </section>
 
+    <div id="descriptions">
+        <p>A következő képletekben a <code>code</code> karaktersorozat a dobozokban megjelenő bináris számra utal.</p>
+        <p id="blue-desc" aria-label="kék páros">
+            Akkor kattints a <b>kék</b> dobozra, ha ez az állítás igaz: <code>code % 2 == 0</code>
+        </p>
+        <p id="black-desc" aria-label="fekete páros">
+            Akkor kattints a <b>fekete</b> dobozra, ha ez az állítás igaz: <code>code >= 16</code>
+        </p>
+        <p id="green-desc" aria-label="zöld páratlan">
+            Akkor kattints a <b>zöld</b> dobozra, ha ez az állítás igaz: <code>code - 1 == code &gt;&gt; 1 &lt;&lt; 1</code>
+        </p>
+    </div>
+
+    <main hidden>
+        <div>
+            <canvas id="canvas" width="600" height="400"></canvas>
         </div>
-        <button disabled id="freeze" onclick="activateFreeze();">Fagyasztás</button>
-        <button disabled id="streak" onclick="activateStreak();">Streak</button>
-        <button disabled id="cheat" onclick="activateCheat();">Cheat</button>
+        <div>
+            Segítégek (az kurzorral rámutatva részletesebb leírás megtalálható):
+            <button disabled id="freeze" title="Megállítja az idő múlását 5 másodpercig." onclick="activateFreeze();">Idő fagyasztás</button>
+            <button disabled id="streak" title="A helyes kódok eltalálásáért bónusz időt, és pontokat ad, a helytelenekért pedig időt vesz el." onclick="activateStreak();">Sorozat bónusz</button>
+            <button disabled id="cheat" title="A képernyőn lévő kódok közül arany színűre vált az, amelyik helyes." onclick="activateCheat();">Csalás</button>
+        </div>
     </main>
 
 

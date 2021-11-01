@@ -9,7 +9,7 @@ const BOUNDING_HEIGHT = 60;
 
 const RENDER_BOUNDING_BOXES = false;
 
-const FREEZE_LENGTH = 3000;
+const FREEZE_LENGTH = 5000;
 const BONUS_TIME_STREAK = 1500;
 const STREAK_BONUS = 10;
 const STREAK_PENALTY = 40;
@@ -23,7 +23,7 @@ const STREAK_PENALTY = 40;
   */
 const canvas = document.querySelector("#canvas");
 
-const colors = ["green", "blue", "black"]
+const colors = ["blue", "black", "green"]
 
 /**
  * @typedef {object} Code
@@ -433,13 +433,15 @@ class Game {
 
         ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-        const points = (this.correctCodesFound / this.totalCorrectCodes * 200) - (this.incorrectCodesFound * 40) + this.bonusPoints;
+        let points = 200;
+        if (this.totalCorrectCodes !== 0)
+            points = (this.correctCodesFound / this.totalCorrectCodes * 200) - (this.incorrectCodesFound * 40) + this.bonusPoints;
 
         ctx.textAlign = "center"
         ctx.textBaseline = "middle"
         ctx.fillStyle = "black";
         ctx.font = "20px monospace";
-        ctx.fillText(`Points: ${points.toFixed(0)}`, this.canvasWidth / 2, this.canvasHeight / 2)
+        ctx.fillText(`Megszerzett pontok: ${points.toFixed(0)}`, this.canvasWidth / 2, this.canvasHeight / 2)
     }
 
     freeze = () => {
@@ -474,7 +476,54 @@ class Game {
  */
 let game = undefined;
 
-game = new Game(600, 400, 10, 1);
+const easyRadio = document.querySelector("#easy");
+const normalRadio = document.querySelector("#normal");
+const hardRadio = document.querySelector("#hard");
+const radios = [easyRadio, normalRadio, hardRadio];
+
+const newGameButton = document.querySelector("#newGame");
+const buttons = [newGameButton];
+
+const main = document.querySelector("main");
+
+const changeDifficulty = (difficulty) => {
+    let gameTime;
+    switch (difficulty){
+        case "easy": {
+            gameTime = 30;
+            game = new Game(600, 400, gameTime, 1);
+            break;
+        }
+        case "normal": {
+            gameTime = 20;
+            game = new Game(600, 400, gameTime, 2);
+            break;
+        }
+        case "hard": {
+            gameTime = 15;
+            game = new Game(600, 400, gameTime, 3);
+            break;
+        }
+    }
+
+    radios.forEach(radio => radio.disabled = true);
+    buttons.forEach(button => button.disabled = false);
+    main.style.display = "flex";
+}
+
+const newGame = () => {
+    radios.forEach(radio => radio.disabled = false);
+    radios.forEach(radio => radio.checked = false);
+    buttons.forEach(button => button.disabled = true);
+    
+    if (game.finished){
+        game = undefined;
+        return;
+    }
+    game.stopGame();
+    game = undefined;
+    main.style.display = "none";
+}
 
 const activateFreeze = () => {
     if (game !== undefined) {
