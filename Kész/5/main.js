@@ -7,6 +7,7 @@ let difficulty = 8;
 const generate = () => {
     bomb.innerHTML = "";
     solution = [];
+    cutCount = 0;
     const tableRow = document.createElement("tr");
     for (let x = 0; x < difficulty; x++) {
         const tableCol = document.createElement("td");
@@ -42,6 +43,7 @@ const pickRandomColor = () => {
 
 const calculateSolution = () => {
     solution = [];
+    cutCount = 0;
     colors.forEach(color => {
         const cables = Array.from(document.querySelectorAll(`.${color}`));
         if (!cables) return;
@@ -59,4 +61,5 @@ const changeDifficulty = () => {
     difficulty = Number(newDiff.value);
     bomb.innerHTML = "";
     solution = [];
+    cutCount = 0;
 }
