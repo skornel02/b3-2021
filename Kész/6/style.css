@@ -22,6 +22,10 @@ td.selected {
     border-radius: 50%;
 }
 
+.hidden {
+    color: transparent;
+}
+
 td.success {
     background: #4ca340;
 }
