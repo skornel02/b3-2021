@@ -12,7 +12,6 @@ console.log(greatestCommonDivisor(6, 3));
 
 const solve = () => {
   let number = document.getElementById("numberInput").valueAsNumber;
-  console.log(number);
   document.getElementById("solution").innerHTML = "";
   relativePrimes = [];
   for (let i = 2; i < 101; i++) {

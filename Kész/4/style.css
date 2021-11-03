@@ -18,6 +18,6 @@ table {
 }
 
 .wall {
-    background: #000;
+    background: url("assets/wall.png");
     background-size: contain;   
 }

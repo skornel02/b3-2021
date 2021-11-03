@@ -1,0 +1,45 @@
+#center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#center div {
+    margin: 10px 0;
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 5px;
+}
+
+td {
+    width: 20px;
+    height: 320px;
+    border: 1px solid black;
+}
+
+.black {
+    background-color: black;
+}
+
+.grey {
+    background-color: grey;
+}
+
+.red {
+    background-color: red;
+}
+
+.green {
+    background-color: green;
+}
+
+.yellow {
+    background-color: yellow;
+}
+
+.blue {
+    background-color: blue;
+}
