@@ -1,44 +1,23 @@
-h1 {
-    color: #e754b7;
-    font-family: Consolas, monospace;
+section table tr td {
+    width: 50px;
+    height: 50px;
+    background: url("assets/floor_tile.png");
+    background-size: contain;
     text-align: center;
+    user-select: none;
 }
 
-.taskList {
-    display: flex;
-    flex-direction: row;
-    padding-right: 10%;
-    padding-left: 10%;
-    justify-content: center;
+table {
+    margin: auto;
+    border-collapse: collapse;
 }
 
-.taskItem {
-    margin: 15px;
-    padding: 15px;
-    padding-top: 0;
-    background-color: rgba(255, 255, 255, 0.6);
+.player {
+    background: url("assets/drone.png");
+    background-size: contain;
 }
 
-.taskItem a:link {
-    text-decoration: none;
-    font-size: 1.2rem;
-    color: #3cb6ff;
-}
-
-.taskItem a:visited {
-    text-decoration: none;
-    font-size: 1.2rem;
-    color: #ffb43c;
-}
-
-.taskItem a:hover {
-    text-decoration: underline;
-    font-size: 1.2rem;
-    color: #ef6a4c;
-}
-
-.taskItem a:active {
-    text-decoration: none;
-    font-size: 1.2rem;
-    color: #fffb3c;
+.wall {
+    background: url("assets/wall.png");
+    background-size: contain;   
 }
