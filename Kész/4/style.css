@@ -21,3 +21,9 @@ table {
     background: url("assets/wall.png");
     background-size: contain;   
 }
+
+#speedSettings {
+    display: flex;
+    justify-content: center;
+    margin: 15px 0;
+}
