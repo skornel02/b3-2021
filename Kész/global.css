@@ -1,0 +1,63 @@
+html {
+    background-color: #fffbd6;
+    padding-bottom: 3%;
+}
+
+body {
+    margin: 0px;
+}
+
+footer {
+    background-color: rgba(50, 255, 50, 0.4);
+    bottom: 0;
+    height: 5%;
+    left: 0;
+    padding: 0;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    display: grid;
+    grid-template-columns: repeat(3, 33%);
+}
+
+footer a {
+    text-decoration: none;
+}
+
+footer button {
+    background-color: transparent;
+    border: 0;
+    bottom: 0;
+    cursor: pointer;
+    /*display: block;*/
+    font-size: 1.7em;
+    font-weight: normal;
+    height: 100%;
+    outline: none !important;
+    /*position: absolute;*/
+    /*width: 30%;*/
+}
+
+footer button:focus, footer button:active, footer button::-moz-focus-inner {
+    border: 0 !important;
+    outline: none !important;
+}
+
+footer #taskForward {
+    grid-column-start: 3;
+    padding-right: 20px;
+    text-align: right;
+}
+
+footer #toMenu {
+    grid-column-start: 2;
+    padding-left: 20px;
+    padding-right: 20px;
+    text-align: center;
+}
+
+footer #taskBackward {
+    grid-column-start: 1;
+    padding-left: 20px;
+    text-align: left;
+}
