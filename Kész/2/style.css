@@ -5,7 +5,7 @@
     flex-direction: column;
 }
 
-button {
+main button {
     margin: 5px 0;
 }
 
@@ -26,3 +26,4 @@ td {
 .black {
     background-color: black;
 }
+
