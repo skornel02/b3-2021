@@ -1,5 +1,12 @@
-html {
-    background-color: #fffbd6;
+#center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#center div {
+    margin: 10px 0;
 }
 
 table{

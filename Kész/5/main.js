@@ -6,6 +6,7 @@ let difficulty = 8;
 
 const generate = () => {
     bomb.innerHTML = "";
+    solution = [];
     const tableRow = document.createElement("tr");
     for (let x = 0; x < difficulty; x++) {
         const tableCol = document.createElement("td");
@@ -31,7 +32,7 @@ const cut = (event) => {
     if (cutCount >= difficulty) {
         setTimeout(() => {
             alert("Hatástalanítva! Ügyes!");
-        })
+        }, 100)
     }
 }
 
@@ -57,4 +58,5 @@ const changeDifficulty = () => {
     const newDiff = document.querySelector("#difficulty");
     difficulty = Number(newDiff.value);
     bomb.innerHTML = "";
+    solution = [];
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="hu">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,10 +9,16 @@
     <link rel="stylesheet" href="../global.css">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <button id="start">Kezdés!</button>
-    <input type="number" name="difficulty" id="difficulty" min="5" max="9" value="7" onchange="changeDifficulty()">
-    <table id="game"></table>
+    <div id="center">
+        <div>
+            <button id="start">Kezdés!</button>
+            <input type="number" name="difficulty" id="difficulty" min="5" max="9" value="7"
+                onchange="changeDifficulty()">
+        </div>
+        <table id="game"></table>
+    </div>
 
     <footer>
         <a id="taskBackward" href="../5/index.html">
@@ -20,4 +27,5 @@
     </footer>
     <script src="main.js"></script>
 </body>
+
 </html>
