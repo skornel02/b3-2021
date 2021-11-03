@@ -192,7 +192,7 @@ class Game {
 
         const { column: playerX, row: playerY } = this.getPlayer();
         const [nextX, nextY] = getNextCoordinate(playerX, playerY, direction);
-        console.log(`(${playerX};${playerY}) -${direction}-> (${nextX};${nextY})`)
+        //console.log(`(${playerX};${playerY}) -${direction}-> (${nextX};${nextY})`)
         const nextCell = this.getCell(nextX, nextY);
         if (nextCell === undefined) return false;
         this.totalSteps += 1;
@@ -319,9 +319,11 @@ const tick = () => {
     const nextStep = game.getNextCellDirection();
     game.movePlayer(nextStep);
     game.render();
+    
+    let nextTick = parseInt(document.querySelector("#speed").value);
+    if (isNaN(nextTick)) nextTick = 100;
+
+    setTimeout(tick, nextTick * 10)
 }
 
-
-setInterval(() => {
-    tick()
-}, 10)
+tick();
