@@ -1,25 +1,25 @@
-let number = document.getElementById("numberInput").valueAsNumber;
 let relativePrimes = [];
 
-function gcd_two_numbers(x, y) {
-    x = Math.abs(x);
-    y = Math.abs(y);
-    while(y) {
-      var t = y;
-      y = x % y;
-      x = t;
-    }
-    return x;
+const greatestCommonDivisor = (firstNum, secondNum) => {
+  if (!secondNum) {
+    return firstNum;
   }
   
-function solve() {
-    document.getElementById("solution").innerHTML = "";
-    relativePrimes = [];
-    for (let i = 2; i < 101; i++) {
-         if (gcd_two_numbers(number, i) === 1) {
-            relativePrimes.push(i);
-        }
+  return greatestCommonDivisor(secondNum, firstNum % secondNum);
+}
+
+console.log(greatestCommonDivisor(6, 3));
+
+const solve = () => {
+  let number = document.getElementById("numberInput").valueAsNumber;
+  console.log(number);
+  document.getElementById("solution").innerHTML = "";
+  relativePrimes = [];
+  for (let i = 2; i < 101; i++) {
+    if (greatestCommonDivisor(number, i) === 1) {
+        relativePrimes.push(i);
+      }
     }
     
-    document.getElementById("solution").innerHTML = relativePrimes.join(", ");
+    document.getElementById("solution").innerText = "Relatív prímek: " + relativePrimes.join(", ");
 }

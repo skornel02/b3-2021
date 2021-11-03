@@ -49,8 +49,8 @@ const solve = () => {
     let bytes = document.getElementById("textInput").value;
 
     if (!isCodeCorrect(bytes)) {
-        document.getElementById("solution").innerHTML = "A kód helytelen!"
+        document.getElementById("solution").innerText = "A kód helytelen!"
     } else {
-        document.getElementById("solution").innerHTML = "A kód helyes!"
+        document.getElementById("solution").innerText = "A kód helyes!"
     }
 }
