@@ -4,21 +4,27 @@ const greatestCommonDivisor = (firstNum, secondNum) => {
   if (!secondNum) {
     return firstNum;
   }
-  
+
   return greatestCommonDivisor(secondNum, firstNum % secondNum);
 }
 
-console.log(greatestCommonDivisor(6, 3));
+const writePrimaries = (num) => {
+  document.getElementById("solution").innerHTML = "";
+  relativePrimes = [];
+  
+  for (let i = 2; i < 101; i++) {
+    if (greatestCommonDivisor(num, i) === 1) {
+      relativePrimes.push(i);
+    }
+  }
+  document.getElementById("solution").innerText = "Relatív prímek: " + relativePrimes.join(", ");
+}
 
 const solve = () => {
   let number = document.getElementById("numberInput").valueAsNumber;
-  document.getElementById("solution").innerHTML = "";
-  relativePrimes = [];
-  for (let i = 2; i < 101; i++) {
-    if (greatestCommonDivisor(number, i) === 1) {
-        relativePrimes.push(i);
-      }
-    }
-    
-    document.getElementById("solution").innerText = "Relatív prímek: " + relativePrimes.join(", ");
+  if (number < 2 || number > 100) {
+    alert("A szám nem 2 és 100 között van!");
+  } else {
+    writePrimaries(number);
+  }
 }
