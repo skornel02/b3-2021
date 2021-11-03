@@ -1,44 +1,45 @@
-h1 {
-    color: #e754b7;
-    font-family: Consolas, monospace;
-    text-align: center;
-}
-
-.taskList {
+#center {
     display: flex;
-    flex-direction: row;
-    padding-right: 10%;
-    padding-left: 10%;
     justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
-.taskItem {
-    margin: 15px;
-    padding: 15px;
-    padding-top: 0;
-    background-color: rgba(255, 255, 255, 0.6);
+#center div {
+    margin: 10px 0;
 }
 
-.taskItem a:link {
-    text-decoration: none;
-    font-size: 1.2rem;
-    color: #3cb6ff;
+table {
+    border-collapse: separate;
+    border-spacing: 5px;
 }
 
-.taskItem a:visited {
-    text-decoration: none;
-    font-size: 1.2rem;
-    color: #ffb43c;
+td {
+    width: 20px;
+    height: 320px;
+    border: 1px solid black;
 }
 
-.taskItem a:hover {
-    text-decoration: underline;
-    font-size: 1.2rem;
-    color: #ef6a4c;
+.black {
+    background-color: black;
 }
 
-.taskItem a:active {
-    text-decoration: none;
-    font-size: 1.2rem;
-    color: #fffb3c;
+.grey {
+    background-color: grey;
+}
+
+.red {
+    background-color: red;
+}
+
+.green {
+    background-color: green;
+}
+
+.yellow {
+    background-color: yellow;
+}
+
+.blue {
+    background-color: blue;
 }

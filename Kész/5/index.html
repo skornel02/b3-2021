@@ -4,11 +4,18 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PH</title>
+    <title>Bombaszakértők</title>
     <link rel="stylesheet" href="../global.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="center">
+        <div>
+            <button onclick="generate()">Generálás!</button>
+            Állíts nehézséget: <input type="number" name="difficulty" id="difficulty" min="3" max="15" value="8" onchange="changeDifficulty()">
+        </div>
+        <table id="cables"></table>
+    </div>
 
     <footer>
         <a id="taskBackward" href="../4/index.html">
