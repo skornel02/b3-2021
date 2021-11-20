@@ -1,5 +1,5 @@
 /**
- * @typedef {object} Node
+ * @typedef {object} GameNode
  * @property {number} row
  * @property {number} column
  * @property {bool} isFirewall
@@ -8,6 +8,39 @@
  * @property {bool} isDecodeHelp
  * @property {bool} isSneakHelp
  * @property {bool} isActivated
+ */
+
+/**
+ * @typedef {object} MapStatus
+ * @property {string} field
+ * @property {number} rowcount
+ * @property {number} colcount
+ */
+
+/**
+ * @typedef {object} PlayerStatus
+ * @property {number} posx
+ * @property {number} posy
+ * @property {number} actionsused
+ * @property {number} targets
+ * @property {number} sneakhelp
+ * @property {number} decodehelp
+ */
+
+/**
+ * @typedef {object} MapObject
+ * @property {number} ID
+ * @property {string} type
+ * @property {number} posx
+ * @property {number} posy
+ * @property {bool} activated
+ */
+
+/**
+ * @typedef {object} GameStatus
+ * @property {MapStatus} map
+ * @property {PlayerStatus} player
+ * @property {MapObject[]} objects
  */
 
 /**
@@ -21,20 +54,29 @@ let height = null;
 
 const startGame = async taskId => {
     task = await getTask(taskId);
-    width = task.data.map.colcount;
-    height = task.data.map.rowcount;
+    width = task.map.colcount;
+    height = task.map.rowcount;
 
-    for (let y = 0; y < width; y++) {
+    for (let rowI = 0; rowI < height; rowI++) {
         const row = [];
-        for (let x = 0; x < height; x++) {
-            row[x] = "";
+        for (let colI = 0; colI < width; colI++) {
+            row[colI] = {
+                row: rowI,
+                col: colI,
+                isFirewall: false,
+                isTarget: false,
+                isPlayer: false,
+                isDecodeHelp: false,
+                isSneakHelp: false,
+                isActivated: false
+            };
         }
-        game[y] = [...row];
+        game[rowI] = [...row];
     }
     main.innerHTML = "";
     const table = generateTable();
     main.appendChild(table);
-    console.log(task.data.map.field);
+    console.log(task.map.field);
     refreshPlayer();
     refreshTargets();
 
@@ -45,14 +87,36 @@ const generateTable = () => {
     const table = document.createElement("table");
 
     table.innerHTML = "";
-    for (let y = 0; y < width; y++) {
+    for (let rowI = 0; rowI < height; rowI++) {
         const tableRow = document.createElement("tr");
-        for (let x = 0; x < height; x++) {
+        for (let colI = 0; colI < width; colI++) {
             const tableCol = document.createElement("td");
-            if(game[y][x] === "player"){
+            if(game[rowI][colI].isPlayer){
                 tableCol.classList.add("player");
-            } else {
-                tableCol.innerText = game[y][x];
+            } 
+
+            if (game[rowI][colI].isTarget) {
+                tableCol.classList.add("target");
+            } 
+
+            if (game[rowI][colI].isFirewall) {
+                tableCol.classList.add("firewall");
+                tableCol.innerText += "firewall ";
+            } 
+
+            if (game[rowI][colI].isDecodeHelp) {
+                tableCol.classList.add("target");
+                tableCol.innerText += "decode ";
+            } 
+
+            if (game[rowI][colI].isSneakHelp) {
+                tableCol.classList.add("target");
+                tableCol.innerText += "sneak ";
+            } 
+            
+            if (game[rowI][colI].isActivated) {
+                tableCol.classList.add("target");
+                tableCol.innerText += "active ";
             }
             tableRow.appendChild(tableCol);
         }
@@ -62,6 +126,11 @@ const generateTable = () => {
     return table;
 };
 
+/**
+ * 
+ * @param {number} taskId 
+ * @returns {GameStatus}
+ */
 const getTask = async taskId => {
     const requestBody = {
         action: "starttask",
@@ -73,14 +142,14 @@ const getTask = async taskId => {
         body: JSON.stringify(requestBody),
     });
 
-    return resp.json();
+    return (await resp.json()).data;
 };
 
 const refreshPlayer = () => {
-    const posX = task.data.player.posx;
-    const posY = task.data.player.posy;
+    const posX = task.player.posx;
+    const posY = task.player.posy;
 
-    game[posY][posX] = "player";
+    game[posY][posX].isPlayer = true;
     console.log(game);
     main.innerHTML = "";
     const table = generateTable();
@@ -88,13 +157,42 @@ const refreshPlayer = () => {
 }
 
 const refreshTargets = () => {
-    task.data.objects.forEach(object => {
+    task.objects.forEach(object => {
         const posX = object.posx;
         const posY = object.posy;
 
-        game[posY][posX] = object.type;
+        switch (object.type) {
+            case "target": {
+                game[posY][posX].isTarget = true;
+                break;
+            }
+            case "decodehelp": {
+                game[posY][posX].isDecodeHelp = true;
+                break;
+            }
+            case "sneakhelp": {
+                game[posY][posX].isSneakHelp = true;
+                break;
+            }
+        }
         main.innerHTML = "";
     });
+
+    let row = 0;
+    task.map.field.split("\n").forEach(line => {
+        let col = 0;
+        line.split("").forEach(char => {
+            if (char === ".") {
+                col++;
+                return;
+            }
+            if (char === "o") {
+                game[row][col].isFirewall = true;
+                col++;
+            }
+        })
+        row++;
+    })
     const table = generateTable();
     main.appendChild(table);
 }
