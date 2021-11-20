@@ -14,6 +14,16 @@ td {
 }
 
 .target {
-    background: url("assets/targetServer.png");
+    background: url("assets/target.png");
+    background-size: contain;
+}
+
+.decode {
+    background: url("assets/decode_help.png");
+    background-size: contain;
+}
+
+.sneak {
+    background: url("assets/sneak_help.png");
     background-size: contain;
 }
