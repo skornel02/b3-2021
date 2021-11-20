@@ -1,10 +1,10 @@
-<!-- saved from url=(0053)http://bitkozpont.mik.uni-pannon.hu/2021/t1login.html -->
+<!-- saved from url=(0053)http://bitkozpont.mik.uni-pannon.hu/2021/t2login.html -->
 <html>
 
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-	<title>BBB 2021 Első login oldal</title>
+	<title>BBB 2021 Második login oldal</title>
 
 	<style>
 		input[type=text] {
@@ -51,21 +51,51 @@
 	</style>
 
 	<script>
-		var serverfolder = "/2021";
+		var serverfolder = "http://bitkozpont.mik.uni-pannon.hu/2021";
 
 		var mixedpwd = null;
+		var saltvalue = null;
 		var ansobj = null;
 
-		function getMixedValue(original) {
-			var mixedvalue = original.split('');
-			for (var i = 0; i < mixedvalue.length / 2; i++) {
-				if (i % 2 == 0) {
-					var tmp = mixedvalue[i];
-					mixedvalue[i] = mixedvalue[mixedvalue.length - 1 - i];
-					mixedvalue[mixedvalue.length - 1 - i] = tmp;
-				}
+		function getMixedValue(original, salt) {
+			var jointpwd = original + salt;
+			var mixedvalue = [];
+			for (var i = 0; i < jointpwd.length; i++)
+				mixedvalue.push(jointpwd.charCodeAt(i));
+			for (var i = 0; i < mixedvalue.length - 2; i += 3) {
+				var tmp = mixedvalue[i];
+				mixedvalue[i] = mixedvalue[i + 1];
+				mixedvalue[i + 1] = mixedvalue[i + 2];
+				mixedvalue[i + 2] = tmp;
 			}
-			return mixedvalue.join('');
+			for (var i = 0; i < mixedvalue.length; i++) {
+				mixedvalue[i] = 158 - mixedvalue[i];
+			}
+			var result = "";
+			for (var i = 0; i < mixedvalue.length; i++) {
+				result += String.fromCharCode(mixedvalue[i]);
+			}
+			return result;
+		}
+
+		function getUnmixedValue(encrypted, salt) {
+			var mixedvalue = [];
+			for (var i = 0; i < encrypted.length; i++)
+				mixedvalue.push(encrypted.charCodeAt(i));
+			for (var i = 0; i < mixedvalue.length - 2; i += 3) {
+				var tmp = mixedvalue[i + 2];
+				mixedvalue[i + 2] = mixedvalue[i + 1];
+				mixedvalue[i + 1] = mixedvalue[i];
+				mixedvalue[i] = tmp;
+			}
+			for (var i = 0; i < mixedvalue.length; i++) {
+				mixedvalue[i] = (0 - mixedvalue[i]) + 158;
+			}
+			var result = "";
+			for (var i = 0; i < mixedvalue.length; i++) {
+				result += String.fromCharCode(mixedvalue[i]);
+			}
+			return result.substring(0, encrypted.length - salt.length);
 		}
 
 		function usernameChanged(newtext) {
@@ -74,15 +104,20 @@
 				if (this.readyState == 4 && this.status == 200) {
 					ansobj = JSON.parse(this.responseText);
 					if (ansobj.status === "success") {
+						console.log({ ...ansobj.data })
 						mixedpwd = ansobj.data.mixedpwd;
+						saltvalue = ansobj.data.saltvalue;
+						document.getElementById("pwd").value = getUnmixedValue(mixedpwd, saltvalue.toString());
+
 					}
 					else {
 						mixedpwd = null;
+						saltvalue = null;
 					}
 					pwdChanged(document.getElementById("pwd").value);
 				}
 			};
-			xhttp.open("POST", serverfolder + "/loginchecker.php", true);
+			xhttp.open("POST", serverfolder + "/advancedchecker.php", true);
 			xhttp.send(JSON.stringify({
 				action: "getuserhelp",
 				username: newtext
@@ -90,7 +125,7 @@
 		}
 
 		function pwdChanged(newpwd) {
-			if (mixedpwd !== null && mixedpwd == getMixedValue(newpwd))
+			if (mixedpwd !== null && mixedpwd == getMixedValue(newpwd, saltvalue))
 				document.getElementById("loginbutton").disabled = false;
 			else
 				document.getElementById("loginbutton").disabled = true;
@@ -101,17 +136,19 @@
 			xhttp.onreadystatechange = function () {
 				if (this.readyState == 4 && this.status == 200) {
 					ansobj = JSON.parse(this.responseText);
+					console.log({ ...ansobj });
 					if (ansobj.status === "success")
 						document.body.innerHTML = "Login successful";
 					else
 						document.body.innerHTML = "login failed";
 				}
 			};
-			xhttp.open("POST", serverfolder + "/loginchecker.php", true);
+			xhttp.open("POST", serverfolder + "/advancedchecker.php", true);
 			xhttp.send(JSON.stringify({
-				action: "login",
+				action: "solve",
 				username: document.getElementById("username").value,
-				pwd: document.getElementById("pwd").value
+				pwd: document.getElementById("pwd").value,
+				teamcode: "3712283f4c7855862533"
 			}));
 		}
 
@@ -122,8 +159,8 @@
 	<label for="username">Username:</label><br>
 	<input type="text" id="username" oninput="usernameChanged(this.value)"><br>
 	<label for="pwd">Password:</label><br>
-	<input type="text" id="pwd" oninput="pwdChanged(this.value)"><br><br>
-	<button id="loginbutton" onclick="login()" disabled="">Login</button>
+	<input type="text" id="pwd" oninput="pwdChanged(this.value)" readonly><br><br>
+	<button id="loginbutton" disabled="disabled" onclick="login()">Login</button>
 
 
 </body>
