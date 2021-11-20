@@ -61,6 +61,10 @@ const sneakImage = new Image();
 sneakImage.src = "assets/sneak_help.png";
 const targetImage = new Image();
 targetImage.src = "assets/target.png";
+const firewallImage = new Image();
+firewallImage.src = "assets/firewall.png";
+const tileImage = new Image();
+tileImage.src = "assets/tile.png";
 
 let task = null;
 let width = null;
@@ -198,16 +202,9 @@ const renderGameOnCanvas = () => {
     for (let rowI = 0; rowI < height; rowI++) {
         for (let colI = 0; colI < width; colI++) {
             const currentNode = game.getNode(colI, rowI);
-            if (currentNode.isPlayer) {
-                ctx.drawImage(playerImage, colI*50, rowI*50, 50, 50);
-            }
-
+            ctx.drawImage(tileImage, colI*50, rowI*50, 50, 50)
             if (currentNode.isTarget) {
                 ctx.drawImage(targetImage, colI*50, rowI*50, 50, 50);
-            }
-
-            if (currentNode.isFirewall) {
-                //ph
             }
 
             if (currentNode.isDecodeHelp) {
@@ -217,6 +214,14 @@ const renderGameOnCanvas = () => {
             if (currentNode.isSneakHelp) {
                 ctx.drawImage(sneakImage, colI*50, rowI*50, 50, 50);
             }
+
+            if (currentNode.isFirewall) {
+                ctx.drawImage(firewallImage, colI*50, rowI*50, 50, 50);
+            }
+
+            if (currentNode.isPlayer) {
+                ctx.drawImage(playerImage, colI*50, rowI*50, 50, 50);
+            }
         }
     }
 
@@ -224,6 +229,6 @@ const renderGameOnCanvas = () => {
 };
 
 
-startGame(9);
+startGame(7);
 renderGameOnCanvas();
 div.appendChild(canvas);
