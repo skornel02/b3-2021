@@ -64,6 +64,8 @@ const firewallImage = new Image();
 firewallImage.src = "assets/firewall.png";
 const tileImage = new Image();
 tileImage.src = "assets/tile.png";
+const checkImage = new Image();
+checkImage.src = "assets/check.png";
 
 let task = null;
 let width = null;
@@ -127,7 +129,11 @@ const getTask = async taskId => {
     return (await resp.json()).data;
 };
 
-
+let playerPos = {row: 0, col: 0};
+let prevPlayerPos = {row: 0, col: 0};
+let curPlayerPos = {row: 0, col: 0};
+let initial = true;
+let cooldown = 0;
 const renderGameOnCanvas = () => {
     const ctx = canvas.getContext("2d");
     if (game === undefined) {
@@ -136,6 +142,7 @@ const renderGameOnCanvas = () => {
     } 
     canvas.width = game.columns * 50;
     canvas.height = game.rows * 50;
+    ctx.clearRect(0, 0, game.columns * 50, game.rows * 50)
 
     for (let rowI = 0; rowI < height; rowI++) {
         for (let colI = 0; colI < width; colI++) {
@@ -157,16 +164,56 @@ const renderGameOnCanvas = () => {
                 ctx.drawImage(firewallImage, colI*50, rowI*50, 50, 50);
             }
 
+            if (currentNode.isActivated) {
+                ctx.drawImage(checkImage, colI*50, rowI*50, 50, 50);
+            }
+
             if (currentNode.isPlayer) {
-                ctx.drawImage(playerImage, colI*50, rowI*50, 50, 50);
+                playerPos = {
+                    row: rowI*50,
+                    col: colI*50
+                }
             }
         }
     }
 
-    window.requestAnimationFrame(renderGameOnCanvas)
+    let movementModifier = 50/60;
+    if (initial) {
+        movementModifier = 10;
+        cooldown++;
+    }
+    if (playerPos.col !== curPlayerPos.col){
+        if (playerPos.col > curPlayerPos.col) {
+            curPlayerPos.col += movementModifier;
+        } else {
+            curPlayerPos.col -= movementModifier;
+        }
+    }
+
+    if (playerPos.row !== curPlayerPos.row){
+        if (playerPos.row > curPlayerPos.row) {
+            curPlayerPos.row += movementModifier;
+        } else {
+            curPlayerPos.row -= movementModifier;
+        }
+    }
+
+    if (prevPlayerPos.col !== curPlayerPos.col){
+        prevPlayerPos.col = curPlayerPos.col;
+    }
+    if (prevPlayerPos.row !== curPlayerPos.row){
+        prevPlayerPos.row = curPlayerPos.row;
+    }
+
+    ctx.drawImage(playerImage, curPlayerPos.col || playerPos.col, curPlayerPos.row || playerPos.row, 50, 50);
+    if (initial && cooldown > 60*60) {
+        initial = false;
+    }
+    window.requestAnimationFrame(renderGameOnCanvas);
 };
 
 
-startGame(7);
+startGame(16);
+
 renderGameOnCanvas();
 div.appendChild(canvas);
