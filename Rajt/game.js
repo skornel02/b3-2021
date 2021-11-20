@@ -45,6 +45,8 @@ export class Game {
      */
     taskId;
 
+    history = [];
+
     constructor(columns, rows, board, playerX, playerY, taskId = undefined) {
         this.columns = columns;
         this.rows = rows;
@@ -57,7 +59,7 @@ export class Game {
     /**
      * @param {number} x 
      * @param {number} y
-     * @returns {import("./main").GameNode} 
+     * @returns {import("./main").GameNode | undefined} 
      */
     getNode = (x, y) => {
         return this.board.filter(node => node.column === x && node.row === y)[0];
@@ -70,10 +72,13 @@ export class Game {
     handleInput = (action) => {
         switch (action) {
             case "activate":
-                return this.handleAction();
+                this.handleAction();
+                break;
             default:
-                return this.handleMove(action);
+                this.handleMove(action);
+                break;
         }
+        this.history.push(action);
     }
 
     handleAction = () => {
@@ -95,7 +100,7 @@ export class Game {
                 this.sendDecodeHelp();
             }
         } else if (node.isSneakHelp) {
-            this.sneakHelp++;            
+            this.sneakHelp++;
             if (this.taskId != undefined) {
                 this.sendSneakHelp();
             }
@@ -115,16 +120,16 @@ export class Game {
             method: "POST",
             body: JSON.stringify(requestBody),
         });
-        const respData= await resp.json();
+        const respData = await resp.json();
         console.log(respData);
         const username = respData.data.activation_user;
-        
+
         const passwordResp = await fetch("http://bitkozpont.mik.uni-pannon.hu/2021/loginchecker.php", {
             method: "POST",
             body: JSON.stringify({
-				action: "getuserhelp",
-				username
-			})
+                action: "getuserhelp",
+                username
+            })
         })
 
         const password = firstBreaker((await passwordResp.json()).data.mixedpwd);
@@ -156,16 +161,16 @@ export class Game {
             method: "POST",
             body: JSON.stringify(requestBody),
         });
-        const respData= await resp.json();
+        const respData = await resp.json();
         console.log(respData);
         const username = respData.data.activation_user;
-        
+
         const passwordResp = await fetch("http://bitkozpont.mik.uni-pannon.hu/2021/advancedchecker.php", {
             method: "POST",
             body: JSON.stringify({
-				action: "getuserhelp",
-				username
-			})
+                action: "getuserhelp",
+                username
+            })
         })
 
         const passwordData = (await passwordResp.json());
@@ -198,16 +203,16 @@ export class Game {
             method: "POST",
             body: JSON.stringify(requestBody),
         });
-        const respData= await resp.json();
+        const respData = await resp.json();
         console.log(respData);
         const username = respData.data.activation_user;
-        
+
         const passwordResp = await fetch("http://bitkozpont.mik.uni-pannon.hu/2021/uberchecker.php", {
             method: "POST",
             body: JSON.stringify({
-				action: "getuserhelp",
-				username
-			})
+                action: "getuserhelp",
+                username
+            })
         })
 
         const password = thirdBreaker((await passwordResp.json()).data.mixedpwd);
@@ -225,6 +230,12 @@ export class Game {
 
         console.groupEnd();
     }
+
+    /**
+     * @param {import("./main").GameNode} node
+     * @returns {number} 
+     */
+    getCostForNode = (node) => Math.max(1, (node.isFirewall ? 5 : 1) - (this.sneakHelp * 2));
 
     /**
      * 
@@ -253,7 +264,7 @@ export class Game {
         }
         const node = this.getNode(this.playerX, this.playerY);
         node.isPlayer = true;
-        let actionPoints = Math.max(1, (node.isFirewall ? 5 : 1) - (this.sneakHelp * 2));
+        let actionPoints = this.getCostForNode(node);
         this.actionsUsed += actionPoints;
 
         if (this.taskId != undefined) {
@@ -305,6 +316,81 @@ export class Game {
         }
         console.groupEnd();
     }
+
+    isGameFinished = () => !this.getActiveGoalNodes().some(node => node.isTarget);
+
+    ///////////////////////////////////////////////////////////////////////
+
+    /**
+     * 
+     * @param {import("./main").GameNode} node
+     * @returns {{cost: number, movements: Direction[]}}
+     */
+    createPathFindingForNode = (node) => {
+        this.board.forEach(node => node.pathCost = Infinity);
+        this.pathFind(node, 0, "up");
+        const result = {
+            cost: this.getNode(this.playerX, this.playerY).pathCost,
+            movements: [],
+        }
+        let pointerX = this.playerX;
+        let pointerY = this.playerY;
+        while (pointerX !== node.column || pointerY !== node.row) {
+            const nextNode = this.getNode(pointerX, pointerY);
+            result.movements.push(nextNode.pathDirection);
+            const [nextX, nextY] = getNextCoordinate(pointerX, pointerY, nextNode.pathDirection);
+            pointerX = nextX;
+            pointerY = nextY;
+        }
+        return result;
+    }
+
+    /**
+     * @param {import("./main").GameNode} node 
+     * @param {number} cost 
+     * @param {Direction} direction
+     */
+    pathFind = (node, cost, direction) => {
+        if (cost >= node.pathCost) return;
+        node.pathCost = cost;
+        node.pathDirection = direction;
+        const costOfNode = this.getCostForNode(node);
+        directions.forEach(direction => {
+            const [nextX, nextY] = getNextCoordinate(node.column, node.row, direction);
+            const nextNode = this.getNode(nextX, nextY);
+            if (nextNode !== undefined) {
+                this.pathFind(nextNode, costOfNode + cost, getOppositeDirection(direction));
+            }
+        })
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+
+    /**
+     * @returns {Game}
+     */
+    solve = () => {
+        if (this.isGameFinished()) return this;
+
+        const games = this.getActiveGoalNodes().map(goalNode => {
+            // console.log("Goal node: ", goalNode.id);
+            const pathFinding = this.createPathFindingForNode(goalNode);
+            // console.log("path: ", pathFinding);
+            const nextGame = deserializeGame(serializeGame(this));
+            nextGame.taskId = undefined;
+            pathFinding.movements.forEach(movement => {
+                nextGame.handleInput(movement);
+            })
+            nextGame.handleInput("activate");
+            return nextGame.solve();
+        });
+        games.sort((a, b) => a.actionsUsed - b.actionsUsed);
+        return games[0];
+    }
+
+    getActiveGoalNodes = () => {
+        return this.board.filter(node => node.id !== undefined && !node.isActivated);
+    }
 }
 
 const serializeGame = (game) => JSON.stringify(game);
@@ -314,4 +400,40 @@ const deserializeGame = (gameText) => {
     var parsed = JSON.parse(gameText);
     Object.assign(game, parsed);
     return game;
+}
+
+/**
+ * @param {number} column
+ * @param {number} row
+ * @param {Direction} direction
+ * @returns {[number, number]} [column, row]
+ */
+const getNextCoordinate = (column, row, direction) => {
+    switch (direction) {
+        case 'up':
+            return [column, row - 1];
+        case 'down':
+            return [column, row + 1];
+        case 'left':
+            return [column - 1, row];
+        case 'right':
+            return [column + 1, row];
+    }
+}
+
+/**
+ * @param {Direction} direction
+ * @returns {Direction} opposite direction
+ */
+const getOppositeDirection = (direction) => {
+    switch (direction) {
+        case 'up':
+            return 'down';
+        case 'down':
+            return 'up';
+        case 'left':
+            return 'right';
+        case 'right':
+            return 'left';
+    }
 }
