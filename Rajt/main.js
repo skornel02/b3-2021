@@ -50,10 +50,6 @@ import {Game} from './game.js'
  */
 let game = undefined;
 
-/**
- * @type {Node[][]}
- */
-const board = [];
 const main = document.querySelector("main");
 let task = null;
 let width = null;
@@ -75,7 +71,7 @@ const startGame = async taskId => {
              */
             const node = {
                 row: rowI,
-                col: colI,
+                column: colI,
                 isFirewall: task.map.field.split("\n")[rowI][colI] === 'o',
                 isTarget: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "target"),
                 isPlayer: rowI == playerY && colI == playerX,
@@ -97,42 +93,42 @@ const startGame = async taskId => {
     console.log(task.map.field);
     refreshPlayer();
     refreshTargets();
-
-    //console.log(game);
 };
 
 const generateTable = () => {
     const table = document.createElement("table");
 
     table.innerHTML = "";
+
     for (let rowI = 0; rowI < height; rowI++) {
         const tableRow = document.createElement("tr");
         for (let colI = 0; colI < width; colI++) {
             const tableCol = document.createElement("td");
-            if(board[rowI][colI].isPlayer){
+            const currentNode = game.getNode(colI, rowI);
+            if(currentNode.isPlayer){
                 tableCol.classList.add("player");
             } 
 
-            if (board[rowI][colI].isTarget) {
+            if (currentNode.isTarget) {
                 tableCol.classList.add("target");
             } 
 
-            if (board[rowI][colI].isFirewall) {
+            if (currentNode.isFirewall) {
                 tableCol.classList.add("firewall");
                 tableCol.innerText += "firewall ";
             } 
 
-            if (board[rowI][colI].isDecodeHelp) {
+            if (currentNode.isDecodeHelp) {
                 tableCol.classList.add("target");
                 tableCol.innerText += "decode ";
             } 
 
-            if (board[rowI][colI].isSneakHelp) {
+            if (currentNode.isSneakHelp) {
                 tableCol.classList.add("target");
                 tableCol.innerText += "sneak ";
             } 
             
-            if (board[rowI][colI].isActivated) {
+            if (currentNode.isActivated) {
                 tableCol.classList.add("target");
                 tableCol.innerText += "active ";
             }
@@ -164,13 +160,13 @@ const getTask = async taskId => {
 };
 
 const refreshPlayer = () => {
-    console.log(board);
     main.innerHTML = "";
     const table = generateTable();
     main.appendChild(table);
 }
 
 const refreshTargets = () => {
+    main.innerHTML = "";
     const table = generateTable();
     main.appendChild(table);
 }

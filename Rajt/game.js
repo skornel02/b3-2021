@@ -20,7 +20,7 @@ export class Game {
     rows;
 
     /**
-     * @type {GameNode[]}
+     * @type {import("./main").GameNode[]}
      */
     board;
 
@@ -52,7 +52,7 @@ export class Game {
      * @returns {GameNode} 
      */
     getNode = (x, y) => {
-        return this.board.filter(node => node.column = x && node.row == y)[0];
+        return this.board.filter(node => node.column === x && node.row === y)[0];
     }
 
     /**
