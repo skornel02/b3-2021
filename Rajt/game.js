@@ -372,10 +372,23 @@ export class Game {
     solve = () => {
         if (this.isGameFinished()) return this;
 
-        const games = this.getActiveGoalNodes().map(goalNode => {
-            // console.log("Goal node: ", goalNode.id);
+        const results = this.getActiveGoalNodes().map(goalNode => {
             const pathFinding = this.createPathFindingForNode(goalNode);
-            // console.log("path: ", pathFinding);
+
+            return {
+                goalNode,
+                pathFinding,
+            }
+        })
+
+        results.sort((a, b) => a.pathFinding.cost - b.pathFinding.cost);
+        const constrainedResults = [];
+        for (let i = 0 ; i < Math.min(results.length, 3) ; i++) {
+            constrainedResults.push(results[i]);
+        }
+
+        const games = constrainedResults.map(results => {
+            const {pathFinding} = results;
             const nextGame = deserializeGame(serializeGame(this));
             nextGame.taskId = undefined;
             pathFinding.movements.forEach(movement => {

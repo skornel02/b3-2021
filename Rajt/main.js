@@ -128,7 +128,7 @@ const startGame = async taskId => {
             game.handleInput(solved.history[i]);
             console.log("Sending: ", solved.history[i]);
             ++i;
-            setTimeout(next, 1000);
+            setTimeout(next, 150);
         }
         next();
     }
@@ -239,6 +239,6 @@ const renderGameOnCanvas = () => {
 };
 
 
-startGame(8);
+startGame(7);
 renderGameOnCanvas();
 div.appendChild(canvas);
