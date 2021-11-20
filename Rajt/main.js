@@ -1,4 +1,4 @@
-import {Game} from './game.js'
+import { Game } from "./game.js";
 
 /**
  * @typedef {object} GameNode
@@ -51,6 +51,17 @@ import {Game} from './game.js'
 let game = undefined;
 
 const main = document.querySelector("main");
+const div = document.querySelector("div");
+const canvas = document.createElement("canvas");
+const playerImage = new Image();
+playerImage.src = "assets/drone_wo_floor.png";
+const decodeImage = new Image();
+decodeImage.src = "assets/decode_help.png";
+const sneakImage = new Image();
+sneakImage.src = "assets/sneak_help.png";
+const targetImage = new Image();
+targetImage.src = "assets/target.png";
+
 let task = null;
 let width = null;
 let height = null;
@@ -72,12 +83,16 @@ const startGame = async taskId => {
             const node = {
                 row: rowI,
                 column: colI,
-                isFirewall: task.map.field.split("\n")[rowI][colI] === 'o',
+                isFirewall: task.map.field.split("\n")[rowI][colI] === "o",
                 isTarget: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "target"),
                 isPlayer: rowI == playerY && colI == playerX,
-                isDecodeHelp: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "decodehelp"),
-                isSneakHelp: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "sneakhelp"),
-                isActivated: false
+                isDecodeHelp: task.objects.some(
+                    obj => obj.posx === colI && obj.posy === rowI && obj.type === "decodehelp"
+                ),
+                isSneakHelp: task.objects.some(
+                    obj => obj.posx === colI && obj.posy === rowI && obj.type === "sneakhelp"
+                ),
+                isActivated: false,
             };
             flatBoard.push(node);
         }
@@ -107,29 +122,29 @@ const generateTable = () => {
         for (let colI = 0; colI < width; colI++) {
             const tableCol = document.createElement("td");
             const currentNode = game.getNode(colI, rowI);
-            if(currentNode.isPlayer){
+            if (currentNode.isPlayer) {
                 tableCol.classList.add("player");
-            } 
+            }
 
             if (currentNode.isTarget) {
                 tableCol.classList.add("target");
-            } 
+            }
 
             if (currentNode.isFirewall) {
                 tableCol.classList.add("firewall");
                 tableCol.innerText += "firewall ";
-            } 
+            }
 
             if (currentNode.isDecodeHelp) {
-                tableCol.classList.add("target");
+                tableCol.classList.add("decode");
                 tableCol.innerText += "decode ";
-            } 
+            }
 
             if (currentNode.isSneakHelp) {
-                tableCol.classList.add("target");
+                tableCol.classList.add("sneak");
                 tableCol.innerText += "sneak ";
-            } 
-            
+            }
+
             if (currentNode.isActivated) {
                 tableCol.classList.add("target");
                 tableCol.innerText += "active ";
@@ -143,8 +158,8 @@ const generateTable = () => {
 };
 
 /**
- * 
- * @param {number} taskId 
+ *
+ * @param {number} taskId
  * @returns {GameStatus}
  */
 const getTask = async taskId => {
@@ -165,13 +180,52 @@ const refreshPlayer = () => {
     main.innerHTML = "";
     const table = generateTable();
     main.appendChild(table);
-}
+};
 
 const refreshTargets = () => {
     main.innerHTML = "";
     const table = generateTable();
     main.appendChild(table);
-}
+};
+
+const renderGameOnCanvas = () => {
+    const ctx = canvas.getContext("2d");
+    if (game === undefined) {
+        window.requestAnimationFrame(renderGameOnCanvas);
+        return;
+    } 
+    canvas.width = game.columns * 50;
+    canvas.height = game.rows * 50;
+
+    for (let rowI = 0; rowI < height; rowI++) {
+        for (let colI = 0; colI < width; colI++) {
+            const currentNode = game.getNode(colI, rowI);
+            if (currentNode.isPlayer) {
+                ctx.drawImage(playerImage, colI*50, rowI*50, 50, 50);
+            }
+
+            if (currentNode.isTarget) {
+                ctx.drawImage(targetImage, colI*50, rowI*50, 50, 50);
+            }
+
+            if (currentNode.isFirewall) {
+                //ph
+            }
+
+            if (currentNode.isDecodeHelp) {
+                ctx.drawImage(decodeImage, colI*50, rowI*50, 50, 50);
+            }
+
+            if (currentNode.isSneakHelp) {
+                ctx.drawImage(sneakImage, colI*50, rowI*50, 50, 50);
+            }
+        }
+    }
+
+    window.requestAnimationFrame(renderGameOnCanvas)
+};
+
 
 startGame(9);
-
+renderGameOnCanvas();
+div.appendChild(canvas);
