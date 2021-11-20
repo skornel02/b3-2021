@@ -1,3 +1,5 @@
+import {Game} from './game.js'
+
 /**
  * @typedef {object} GameNode
  * @property {number} row
@@ -44,9 +46,14 @@
  */
 
 /**
+ * @type {Game | undefined}
+ */
+let game = undefined;
+
+/**
  * @type {Node[][]}
  */
-const game = [];
+const board = [];
 const main = document.querySelector("main");
 let task = null;
 let width = null;
@@ -56,23 +63,34 @@ const startGame = async taskId => {
     task = await getTask(taskId);
     width = task.map.colcount;
     height = task.map.rowcount;
+    const playerX = task.player.posx;
+    const playerY = task.player.posy;
+
+    const flatBoard = [];
 
     for (let rowI = 0; rowI < height; rowI++) {
-        const row = [];
         for (let colI = 0; colI < width; colI++) {
-            row[colI] = {
+            /**
+             * @type {GameNode}
+             */
+            const node = {
                 row: rowI,
                 col: colI,
-                isFirewall: false,
-                isTarget: false,
-                isPlayer: false,
-                isDecodeHelp: false,
-                isSneakHelp: false,
+                isFirewall: task.map.field.split("\n")[rowI][colI] === 'o',
+                isTarget: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "target"),
+                isPlayer: rowI == playerY && colI == playerX,
+                isDecodeHelp: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "decodehelp"),
+                isSneakHelp: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "sneakhelp"),
                 isActivated: false
             };
+            flatBoard.push(node);
         }
-        game[rowI] = [...row];
     }
+
+    game = new Game(width, height, flatBoard, playerX, playerY);
+
+    console.log(game);
+
     main.innerHTML = "";
     const table = generateTable();
     main.appendChild(table);
@@ -91,30 +109,30 @@ const generateTable = () => {
         const tableRow = document.createElement("tr");
         for (let colI = 0; colI < width; colI++) {
             const tableCol = document.createElement("td");
-            if(game[rowI][colI].isPlayer){
+            if(board[rowI][colI].isPlayer){
                 tableCol.classList.add("player");
             } 
 
-            if (game[rowI][colI].isTarget) {
+            if (board[rowI][colI].isTarget) {
                 tableCol.classList.add("target");
             } 
 
-            if (game[rowI][colI].isFirewall) {
+            if (board[rowI][colI].isFirewall) {
                 tableCol.classList.add("firewall");
                 tableCol.innerText += "firewall ";
             } 
 
-            if (game[rowI][colI].isDecodeHelp) {
+            if (board[rowI][colI].isDecodeHelp) {
                 tableCol.classList.add("target");
                 tableCol.innerText += "decode ";
             } 
 
-            if (game[rowI][colI].isSneakHelp) {
+            if (board[rowI][colI].isSneakHelp) {
                 tableCol.classList.add("target");
                 tableCol.innerText += "sneak ";
             } 
             
-            if (game[rowI][colI].isActivated) {
+            if (board[rowI][colI].isActivated) {
                 tableCol.classList.add("target");
                 tableCol.innerText += "active ";
             }
@@ -146,53 +164,13 @@ const getTask = async taskId => {
 };
 
 const refreshPlayer = () => {
-    const posX = task.player.posx;
-    const posY = task.player.posy;
-
-    game[posY][posX].isPlayer = true;
-    console.log(game);
+    console.log(board);
     main.innerHTML = "";
     const table = generateTable();
     main.appendChild(table);
 }
 
 const refreshTargets = () => {
-    task.objects.forEach(object => {
-        const posX = object.posx;
-        const posY = object.posy;
-
-        switch (object.type) {
-            case "target": {
-                game[posY][posX].isTarget = true;
-                break;
-            }
-            case "decodehelp": {
-                game[posY][posX].isDecodeHelp = true;
-                break;
-            }
-            case "sneakhelp": {
-                game[posY][posX].isSneakHelp = true;
-                break;
-            }
-        }
-        main.innerHTML = "";
-    });
-
-    let row = 0;
-    task.map.field.split("\n").forEach(line => {
-        let col = 0;
-        line.split("").forEach(char => {
-            if (char === ".") {
-                col++;
-                return;
-            }
-            if (char === "o") {
-                game[row][col].isFirewall = true;
-                col++;
-            }
-        })
-        row++;
-    })
     const table = generateTable();
     main.appendChild(table);
 }

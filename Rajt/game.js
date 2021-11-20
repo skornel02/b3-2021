@@ -8,7 +8,7 @@ const directions = ["left", "right", "up", "down"];
  */
 const actions = [...directions, "activate"];
 
-class Game {
+export class Game {
 
     /**
      * @type {number}
@@ -90,6 +90,8 @@ class Game {
      * @param {Direction} direction 
      */
     handleMove = (direction) => {
+        const lastNode = this.getNode(this.playerX, this.playerY);
+        lastNode.isPlayer = false;
         switch (direction) {
             case "left":
                 if (this.playerX == 0) throw "Can't move left";
@@ -109,6 +111,7 @@ class Game {
                 break;
         }
         const node = this.getNode(this.playerX, this.playerY);
+        node.isPlayer = true;
         let actionPoints = Math.max(1, (node.isFirewall ? 5 : 1) - (this.sneakHelp * 2));
         this.actionsUsed += actionPoints;
     }
