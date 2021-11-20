@@ -12,3 +12,8 @@ td {
     background: url("assets/drone.png");
     background-size: contain;
 }
+
+.target {
+    background: url("assets/targetServer.png");
+    background-size: contain;
+}
