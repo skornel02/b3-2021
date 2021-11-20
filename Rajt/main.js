@@ -75,7 +75,7 @@ const startGame = async taskId => {
              */
             const node = {
                 row: rowI,
-                col: colI,
+                column: colI,
                 isFirewall: task.map.field.split("\n")[rowI][colI] === 'o',
                 isTarget: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "target"),
                 isPlayer: rowI == playerY && colI == playerX,
@@ -87,16 +87,18 @@ const startGame = async taskId => {
         }
     }
 
-    game = new Game(width, height, flatBoard, playerX, playerY);
+    game = new Game(width, height, flatBoard, playerX, playerY, 7);
+    window.game = game;
 
     console.log(game);
+    game.printMap();
 
-    main.innerHTML = "";
-    const table = generateTable();
-    main.appendChild(table);
-    console.log(task.map.field);
-    refreshPlayer();
-    refreshTargets();
+    // main.innerHTML = "";
+    // const table = generateTable();
+    // main.appendChild(table);
+    // console.log(task.map.field);
+    // refreshPlayer();
+    // refreshTargets();
 
     //console.log(game);
 };
@@ -175,5 +177,5 @@ const refreshTargets = () => {
     main.appendChild(table);
 }
 
-startGame(7);
+startGame(9);
 
