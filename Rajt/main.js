@@ -101,7 +101,8 @@ const startGame = async taskId => {
         }
     }
 
-    game = new Game(width, height, flatBoard, playerX, playerY);
+    game = new Game(width, height, flatBoard, playerX, playerY, 7);
+    window.game = game;
 
     console.log(game);
     console.log(task.map.field);
