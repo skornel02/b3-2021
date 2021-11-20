@@ -50,7 +50,6 @@ import { Game } from "./game.js";
  */
 let game = undefined;
 
-const main = document.querySelector("main");
 const div = document.querySelector("div");
 const canvas = document.createElement("canvas");
 const playerImage = new Image();
@@ -105,58 +104,7 @@ const startGame = async taskId => {
     game = new Game(width, height, flatBoard, playerX, playerY);
 
     console.log(game);
-
-    main.innerHTML = "";
-    const table = generateTable();
-    main.appendChild(table);
     console.log(task.map.field);
-    refreshPlayer();
-    refreshTargets();
-};
-
-const generateTable = () => {
-    const table = document.createElement("table");
-
-    table.innerHTML = "";
-
-    for (let rowI = 0; rowI < height; rowI++) {
-        const tableRow = document.createElement("tr");
-        for (let colI = 0; colI < width; colI++) {
-            const tableCol = document.createElement("td");
-            const currentNode = game.getNode(colI, rowI);
-            if (currentNode.isPlayer) {
-                tableCol.classList.add("player");
-            }
-
-            if (currentNode.isTarget) {
-                tableCol.classList.add("target");
-            }
-
-            if (currentNode.isFirewall) {
-                tableCol.classList.add("firewall");
-                tableCol.innerText += "firewall ";
-            }
-
-            if (currentNode.isDecodeHelp) {
-                tableCol.classList.add("decode");
-                tableCol.innerText += "decode ";
-            }
-
-            if (currentNode.isSneakHelp) {
-                tableCol.classList.add("sneak");
-                tableCol.innerText += "sneak ";
-            }
-
-            if (currentNode.isActivated) {
-                tableCol.classList.add("target");
-                tableCol.innerText += "active ";
-            }
-            tableRow.appendChild(tableCol);
-        }
-        table.appendChild(tableRow);
-    }
-
-    return table;
 };
 
 /**
@@ -178,17 +126,6 @@ const getTask = async taskId => {
     return (await resp.json()).data;
 };
 
-const refreshPlayer = () => {
-    main.innerHTML = "";
-    const table = generateTable();
-    main.appendChild(table);
-};
-
-const refreshTargets = () => {
-    main.innerHTML = "";
-    const table = generateTable();
-    main.appendChild(table);
-};
 
 const renderGameOnCanvas = () => {
     const ctx = canvas.getContext("2d");
