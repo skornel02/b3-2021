@@ -1,5 +1,7 @@
+import {Game} from './game.js'
+
 /**
- * @typedef {object} Node
+ * @typedef {object} GameNode
  * @property {number} row
  * @property {number} column
  * @property {bool} isFirewall
@@ -11,9 +13,47 @@
  */
 
 /**
+ * @typedef {object} MapStatus
+ * @property {string} field
+ * @property {number} rowcount
+ * @property {number} colcount
+ */
+
+/**
+ * @typedef {object} PlayerStatus
+ * @property {number} posx
+ * @property {number} posy
+ * @property {number} actionsused
+ * @property {number} targets
+ * @property {number} sneakhelp
+ * @property {number} decodehelp
+ */
+
+/**
+ * @typedef {object} MapObject
+ * @property {number} ID
+ * @property {string} type
+ * @property {number} posx
+ * @property {number} posy
+ * @property {bool} activated
+ */
+
+/**
+ * @typedef {object} GameStatus
+ * @property {MapStatus} map
+ * @property {PlayerStatus} player
+ * @property {MapObject[]} objects
+ */
+
+/**
+ * @type {Game | undefined}
+ */
+let game = undefined;
+
+/**
  * @type {Node[][]}
  */
-const game = [];
+const board = [];
 const main = document.querySelector("main");
 let task = null;
 let width = null;
@@ -21,20 +61,40 @@ let height = null;
 
 const startGame = async taskId => {
     task = await getTask(taskId);
-    width = task.data.map.colcount;
-    height = task.data.map.rowcount;
+    width = task.map.colcount;
+    height = task.map.rowcount;
+    const playerX = task.player.posx;
+    const playerY = task.player.posy;
 
-    for (let y = 0; y < width; y++) {
-        const row = [];
-        for (let x = 0; x < height; x++) {
-            row[x] = "";
+    const flatBoard = [];
+
+    for (let rowI = 0; rowI < height; rowI++) {
+        for (let colI = 0; colI < width; colI++) {
+            /**
+             * @type {GameNode}
+             */
+            const node = {
+                row: rowI,
+                col: colI,
+                isFirewall: task.map.field.split("\n")[rowI][colI] === 'o',
+                isTarget: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "target"),
+                isPlayer: rowI == playerY && colI == playerX,
+                isDecodeHelp: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "decodehelp"),
+                isSneakHelp: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "sneakhelp"),
+                isActivated: false
+            };
+            flatBoard.push(node);
         }
-        game[y] = [...row];
     }
+
+    game = new Game(width, height, flatBoard, playerX, playerY);
+
+    console.log(game);
+
     main.innerHTML = "";
     const table = generateTable();
     main.appendChild(table);
-    console.log(task.data.map.field);
+    console.log(task.map.field);
     refreshPlayer();
     refreshTargets();
 
@@ -45,14 +105,36 @@ const generateTable = () => {
     const table = document.createElement("table");
 
     table.innerHTML = "";
-    for (let y = 0; y < width; y++) {
+    for (let rowI = 0; rowI < height; rowI++) {
         const tableRow = document.createElement("tr");
-        for (let x = 0; x < height; x++) {
+        for (let colI = 0; colI < width; colI++) {
             const tableCol = document.createElement("td");
-            if(game[y][x] === "player"){
+            if(board[rowI][colI].isPlayer){
                 tableCol.classList.add("player");
-            } else {
-                tableCol.innerText = game[y][x];
+            } 
+
+            if (board[rowI][colI].isTarget) {
+                tableCol.classList.add("target");
+            } 
+
+            if (board[rowI][colI].isFirewall) {
+                tableCol.classList.add("firewall");
+                tableCol.innerText += "firewall ";
+            } 
+
+            if (board[rowI][colI].isDecodeHelp) {
+                tableCol.classList.add("target");
+                tableCol.innerText += "decode ";
+            } 
+
+            if (board[rowI][colI].isSneakHelp) {
+                tableCol.classList.add("target");
+                tableCol.innerText += "sneak ";
+            } 
+            
+            if (board[rowI][colI].isActivated) {
+                tableCol.classList.add("target");
+                tableCol.innerText += "active ";
             }
             tableRow.appendChild(tableCol);
         }
@@ -62,6 +144,11 @@ const generateTable = () => {
     return table;
 };
 
+/**
+ * 
+ * @param {number} taskId 
+ * @returns {GameStatus}
+ */
 const getTask = async taskId => {
     const requestBody = {
         action: "starttask",
@@ -73,28 +160,17 @@ const getTask = async taskId => {
         body: JSON.stringify(requestBody),
     });
 
-    return resp.json();
+    return (await resp.json()).data;
 };
 
 const refreshPlayer = () => {
-    const posX = task.data.player.posx;
-    const posY = task.data.player.posy;
-
-    game[posY][posX] = "player";
-    console.log(game);
+    console.log(board);
     main.innerHTML = "";
     const table = generateTable();
     main.appendChild(table);
 }
 
 const refreshTargets = () => {
-    task.data.objects.forEach(object => {
-        const posX = object.posx;
-        const posY = object.posy;
-
-        game[posY][posX] = object.type;
-        main.innerHTML = "";
-    });
     const table = generateTable();
     main.appendChild(table);
 }
