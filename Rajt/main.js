@@ -2,6 +2,7 @@ import { Game } from "./game.js";
 
 /**
  * @typedef {object} GameNode
+ * @property {string | undefined} id
  * @property {number} row
  * @property {number} column
  * @property {bool} isFirewall
@@ -10,6 +11,9 @@ import { Game } from "./game.js";
  * @property {bool} isDecodeHelp
  * @property {bool} isSneakHelp
  * @property {bool} isActivated
+ * //////////////////////////////
+ * @property {import("./game.js").Direction} pathDirection
+ * @property {number} pathCost
  */
 
 /**
@@ -88,6 +92,7 @@ const startGame = async taskId => {
             const node = {
                 row: rowI,
                 column: colI,
+                id: task.objects.filter(obj => obj.posx === colI && obj.posy === rowI).map(obj => obj.ID)[0],
                 isFirewall: task.map.field.split("\n")[rowI][colI] === "o",
                 isTarget: task.objects.some(obj => obj.posx === colI && obj.posy === rowI && obj.type === "target"),
                 isPlayer: rowI == playerY && colI == playerX,
@@ -98,15 +103,36 @@ const startGame = async taskId => {
                     obj => obj.posx === colI && obj.posy === rowI && obj.type === "sneakhelp"
                 ),
                 isActivated: false,
+                pathDirection: "up",
+                pathCost: Infinity,
             };
+            if (node.id !== undefined) node.id = node.id.toString();
             flatBoard.push(node);
         }
     }
 
-    game = new Game(width, height, flatBoard, playerX, playerY, 7);
+    game = new Game(width, height, flatBoard, playerX, playerY, taskId);
     window.game = game;
 
     console.log(game);
+    game.printMap();
+    console.log("Solving game...");
+    const solved = game.solve();
+    console.log("Optimal order: ", solved.history);
+
+    let i = 0;
+    if (true) {
+        const next = () => {
+            if (i >= solved.history.length) return;
+
+            game.handleInput(solved.history[i]);
+            console.log("Sending: ", solved.history[i]);
+            ++i;
+            setTimeout(next, 1000);
+        }
+        next();
+    }
+
     console.log(task.map.field);
 };
 
@@ -213,7 +239,6 @@ const renderGameOnCanvas = () => {
 };
 
 
-startGame(16);
-
+startGame(8);
 renderGameOnCanvas();
 div.appendChild(canvas);
