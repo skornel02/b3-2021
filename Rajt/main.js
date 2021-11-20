@@ -1,5 +1,5 @@
 /**
- * @typedef {object} Node
+ * @typedef {object} GameNode
  * @property {number} row
  * @property {number} column
  * @property {bool} isFirewall
