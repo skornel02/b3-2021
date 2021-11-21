@@ -55,6 +55,7 @@ import { Game } from "./game.js";
 let game = undefined;
 
 const div = document.querySelector("div");
+const main = document.querySelector("main");
 const canvas = document.createElement("canvas");
 const playerImage = new Image();
 playerImage.src = "assets/drone_wo_floor.png";
@@ -117,7 +118,9 @@ const startGame = async taskId => {
     console.log(game);
     game.printMap();
     console.log("Solving game...");
+    main.hidden = false;
     const solved = game.solve();
+    main.hidden = true;
     console.log("Optimal order: ", solved.history);
 
     let i = 0;
@@ -238,7 +241,10 @@ const renderGameOnCanvas = () => {
     window.requestAnimationFrame(renderGameOnCanvas);
 };
 
+const urlSearchParams = new URLSearchParams(window.location.search);
+const params = Object.fromEntries(urlSearchParams.entries());
+console.log(params);
 
-startGame(7);
+startGame(params.task);
 renderGameOnCanvas();
 div.appendChild(canvas);
